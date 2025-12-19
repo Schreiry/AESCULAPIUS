@@ -1,0 +1,157 @@
+/* --- ОСНОВА --- */
+body {
+    background-color: #050505;
+    color: #33ff33;
+    font-family: 'VT323', monospace;
+    margin: 0;
+    overflow: hidden;
+    height: 100vh;
+    text-shadow: 0 0 4px rgba(51, 255, 51, 0.6);
+}
+
+/* --- СКАНЛИНИИ И ЭФФЕКТЫ --- */
+.scanlines {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.2));
+    background-size: 100% 4px;
+    z-index: 99;
+    pointer-events: none;
+}
+.vignette {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.9) 100%);
+    z-index: 98;
+    pointer-events: none;
+}
+.crt-container {
+    display: flex;
+    height: 100vh;
+    padding: 30px;
+    box-sizing: border-box;
+    gap: 20px;
+}
+
+/* --- КРОВЬ --- */
+.blood-drip {
+    position: absolute;
+    top: -150px;
+    width: 100px;
+    height: 200%;
+    background: linear-gradient(180deg, transparent 0%, rgba(139, 0, 0, 0.8) 20%, rgba(50, 0, 0, 0.9) 50%, transparent 100%);
+    z-index: 10;
+    opacity: 0.5;
+    filter: blur(4px);
+    pointer-events: none;
+}
+.left { left: 30px; animation: drip 10s linear infinite; }
+.right { right: 30px; animation: drip 14s linear infinite; }
+@keyframes drip { 0% { transform: translateY(-50%); } 100% { transform: translateY(0%); } }
+
+/* --- ПАНЕЛИ --- */
+.panel {
+    border: 2px solid #33ff33;
+    background: rgba(0, 15, 0, 0.85);
+    box-shadow: 0 0 10px rgba(51, 255, 51, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+.control-panel { flex: 1; justify-content: space-between; }
+.data-panel { flex: 3; overflow: hidden; }
+
+h1 { margin: 0; font-size: 2.5em; border-bottom: 2px dashed #33ff33; letter-spacing: 3px; }
+.sub-header { font-size: 1.2em; opacity: 0.8; margin-bottom: 20px; }
+.blink { animation: blinker 1s infinite; }
+@keyframes blinker { 50% { opacity: 0; } }
+
+/* --- КНОПКИ --- */
+button {
+    background: black;
+    color: #33ff33;
+    border: 2px solid #33ff33;
+    padding: 10px;
+    font-family: 'VT323', monospace;
+    font-size: 1.4em;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    transition: 0.2s;
+}
+button:hover { background: #33ff33; color: black; box-shadow: 0 0 15px #33ff33; }
+button.active { background: #ff0000; border-color: #ff0000; color: black; animation: shake 0.5s infinite; }
+@keyframes shake { 0% {transform: translate(1px, 1px);} 50% {transform: translate(-1px, -1px);} 100% {transform: translate(1px, 1px);} }
+
+/* --- ТАБЛИЦА СО СКРОЛЛОМ --- */
+.table-scroll-wrapper {
+    height: 100%;
+    overflow-y: auto; /* Скролл! */
+    border-top: 2px solid #33ff33;
+}
+/* Кастомный скроллбар (Webkit) */
+.table-scroll-wrapper::-webkit-scrollbar { width: 12px; }
+.table-scroll-wrapper::-webkit-scrollbar-track { background: #000; border-left: 1px solid #33ff33; }
+.table-scroll-wrapper::-webkit-scrollbar-thumb { background: #33ff33; border: 2px solid #000; }
+
+table { width: 100%; border-collapse: collapse; }
+th { position: sticky; top: 0; background: #002200; z-index: 2; padding: 10px; text-align: left; border-bottom: 2px solid #33ff33; }
+td { padding: 5px 10px; border-bottom: 1px solid rgba(51, 255, 51, 0.2); font-size: 1.2em; }
+
+/* ЦВЕТА СТАТУСОВ */
+.row-RED { color: #ff4444; text-shadow: 0 0 5px red; }
+.row-YELLOW { color: #ffee00; text-shadow: 0 0 5px orange; }
+.row-GREEN { color: #33ff33; }
+.row-BLACK { 
+    color: #555; 
+    text-decoration: line-through; 
+    text-shadow: none; 
+    font-weight: bold;
+}
+.blink-RED { animation: blinker 0.2s infinite; }
+.blink-BLACK { animation: blinker 2s infinite; }
+
+/* --- МОДАЛЬНОЕ ОКНО --- */
+.hidden { display: none !important; }
+.modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 200;
+    display: flex; justify-content: center; align-items: center;
+}
+.modal-content {
+    background: #001100;
+    border: 2px solid #33ff33;
+    padding: 20px;
+    width: 500px;
+    box-shadow: 0 0 30px rgba(51,255,51,0.3);
+}
+.modal-header { display: flex; justify-content: space-between; border-bottom: 1px dashed #33ff33; margin-bottom: 20px; }
+.close-btn { cursor: pointer; font-weight: bold; font-size: 1.5em; }
+.close-btn:hover { color: red; }
+
+input, select {
+    background: black; color: #33ff33; border: 1px solid #33ff33;
+    width: 100%; padding: 10px; font-family: 'VT323'; font-size: 1.2em;
+    margin-bottom: 15px; box-sizing: border-box;
+}
+
+.diagnostics-preview { border: 1px dotted #33ff33; padding: 10px; margin-bottom: 15px; font-size: 0.9em; opacity: 0.8; }
+.diagnostics-preview ul { list-style: none; padding: 0; margin: 0; }
+
+/* КАРТОЧКИ (КНОПКИ ВЫБОРА) */
+.cards-container { display: flex; gap: 10px; }
+.card-btn { flex: 1; font-size: 1.2em; padding: 20px 0; border: 2px solid white; color: white; text-shadow: 0 0 5px white; }
+
+.card-green { background: #004400; border-color: #00ff00; color: #00ff00; }
+.card-green:hover { background: #00ff00; color: black; }
+
+.card-yellow { background: #444400; border-color: yellow; color: yellow; }
+.card-yellow:hover { background: yellow; color: black; }
+
+.card-red { background: #440000; border-color: red; color: red; }
+.card-red:hover { background: red; color: white; }
+
+.card-black { background: #111; border-color: #555; color: #555; }
+.card-black:hover { background: #333; color: white; }

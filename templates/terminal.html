@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AESCULAPIUS: OMEGA PROTOCOL</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/retro_style.css">
+</head>
+<body>
+
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+    <div class="blood-drip left"></div>
+    <div class="blood-drip right"></div>
+
+    <div class="crt-container">
+        
+        <div class="panel control-panel">
+            <div class="header-box">
+                <h1>AESCULAPIUS <span class="blink">_v2.0</span></h1>
+                <div class="sub-header">PROTOCOL: OMEGA</div>
+            </div>
+
+            <div class="status-log" id="systemLog">
+                <p>> SYSTEM KERNEL LOADED...</p>
+                <p>> LINKING TO TRIAGE DB...</p>
+                <p>> READY.</p>
+            </div>
+
+            <div class="buttons-container">
+                <button id="chaosBtn" onclick="toggleChaos()">[ START SIMULATION ]</button>
+                <button id="manualBtn" onclick="openManualModal()">[ MANUAL ENTRY ]</button>
+            </div>
+            
+            <div class="decoration-text">
+                CAUTION: BIOHAZARD LEVEL 4<br>
+                AUTHORIZED PERSONNEL ONLY
+            </div>
+        </div>
+
+        <div class="panel data-panel">
+            <h2>> LIVE SUBJECT STREAM</h2>
+            <div class="table-scroll-wrapper">
+                <table id="triageTable">
+                    <thead>
+                        <tr>
+                            <th>TIME</th>
+                            <th>SUBJECT</th>
+                            <th>DIAGNOSIS</th>
+                            <th>DOCTOR</th>
+                            <th>ROOM</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-cross"></div>
+
+    <div id="manualModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>> MANUAL OVERRIDE</h3>
+                <span class="close-btn" onclick="closeManualModal()">X</span>
+            </div>
+            
+            <div class="modal-body">
+                <label>SUBJECT NAME:</label>
+                <input type="text" id="manualName" placeholder="ENTER NAME...">
+
+                <label>ASSIGN DOCTOR:</label>
+                <select id="doctorSelect"></select>
+
+                <div class="diagnostics-preview">
+                    <p>> PRELIMINARY SCAN:</p>
+                    <ul id="randomSymptoms">
+                        <li>- High Fever detected</li>
+                        <li>- Unknown mutation</li>
+                    </ul>
+                </div>
+
+                <p style="text-align: center; margin-top: 15px;">SELECT PRIORITY CARD:</p>
+                <div class="cards-container">
+                    <button class="card-btn card-green" onclick="submitManual('GREEN')">GREEN</button>
+                    <button class="card-btn card-yellow" onclick="submitManual('YELLOW')">YELLOW</button>
+                    <button class="card-btn card-red" onclick="submitManual('RED')">RED</button>
+                    <button class="card-btn card-black" onclick="submitManual('BLACK')">BLACK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ЛОГИКА СИМУЛЯЦИИ ---
+        async function toggleChaos() {
+            const btn = document.getElementById('chaosBtn');
+            const response = await fetch('/api/toggle_chaos', { method: 'POST' });
+            const data = await response.json();
+            
+            if (data.status === "ONLINE") {
+                btn.innerText = "[ TERMINATE STREAM ]";
+                btn.classList.add('active');
+            } else {
+                btn.innerText = "[ START SIMULATION ]";
+                btn.classList.remove('active');
+            }
+        }
+
+        async function updateTable() {
+            try {
+                const response = await fetch('/api/data');
+                const data = await response.json();
+                const tbody = document.querySelector('#triageTable tbody');
+                
+                // Пересобираем таблицу (но теперь она скроллится)
+                tbody.innerHTML = ''; 
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = `row-${row.color}`;
+                    
+                    tr.innerHTML = `
+                        <td>${row.time}</td>
+                        <td>${row.name}</td>
+                        <td>${row.diagnosis}</td>
+                        <td>${row.doctor}</td>
+                        <td>${row.room}</td>
+                        <td class="status-cell blink-${row.color}">${row.color}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Connection error");
+            }
+        }
+        
+        setInterval(updateTable, 1000);
+
+        // --- ЛОГИКА РУЧНОГО ВВОДА ---
+        const modal = document.getElementById('manualModal');
+
+        async function openManualModal() {
+            modal.classList.remove('hidden');
+            
+            // Грузим врачей
+            const res = await fetch('/api/doctors');
+            const doctors = await res.json();
+            const select = document.getElementById('doctorSelect');
+            select.innerHTML = '';
+            doctors.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.id;
+                opt.innerText = d.name;
+                select.appendChild(opt);
+            });
+
+            // Генерируем случайные симптомы для атмосферы
+            const symptoms = ["Coughing Blood", "Pupil Dilation", "Skin Necrosis", "Low Body Temp", "Hallucinations", "Bone Fracture"];
+            const list = document.getElementById('randomSymptoms');
+            list.innerHTML = `<li>- ${symptoms[Math.floor(Math.random()*symptoms.length)]}</li>
+                              <li>- ${symptoms[Math.floor(Math.random()*symptoms.length)]}</li>`;
+        }
+
+        function closeManualModal() {
+            modal.classList.add('hidden');
+        }
+
+        async function submitManual(color) {
+            const name = document.getElementById('manualName').value || "Unknown";
+            const doctorId = document.getElementById('doctorSelect').value;
+
+            await fetch('/api/manual_entry', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name: name, doctor_id: doctorId, color: color })
+            });
+
+            closeManualModal();
+            document.getElementById('manualName').value = ''; // очистка
+        }
+    </script>
+</body>
+</html>
