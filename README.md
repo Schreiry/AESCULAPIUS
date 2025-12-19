@@ -124,6 +124,7 @@ graph TB
 ## 📈 PATIENT FLOW DISTRIBUTION
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': { 'pie1':'#33ff33', 'pie2':'#ffff00', 'pie3':'#ff0000', 'pie4':'#333333'}}}%%
 pie title Patient Status Distribution (Chaos Engine Probabilities)
     "GREEN (Normal)" : 40
     "YELLOW (Stable)" : 30
@@ -345,3 +346,4 @@ This project is a fictional simulation for educational and artistic purposes. It
 Built with obsession by someone who watched too much cyberpunk and played too many survival horror games.
 
 </div>
+
