@@ -307,19 +307,6 @@ The retro aesthetic isn't purely stylistic—it's thematic. We're simulating a f
 
 And then there's the player's role. By interacting with this system, you're forced into the position of power. You can toggle the chaos on and off like a god. You can manually override the algorithm's decisions. But you can't save everyone. The interface gives you control while simultaneously reminding you of your limitations. It's a meditation on helplessness disguised as a control panel.
 
----
-
-## 🔮 FUTURE ENHANCEMENTS
-
-This protocol could evolve:
-
-- **Persistent Statistics Dashboard:** Track survival rates over time, doctor performance metrics, threat distribution patterns
-- **Multi-User Collaboration:** Allow multiple operators to manage different sections of the facility simultaneously
-- **Procedural Narrative Events:** Inject scripted crisis moments (power failures, supply shortages, security breaches)
-- **Sound Design:** Add terminal beeps, flatline tones, ambient facility noise
-- **Mobile Deployment:** Optimize the interface for tablet/phone screens for truly portable dread
-
----
 
 ## ⚠️ DISCLAIMER
 
@@ -341,9 +328,9 @@ This project is a fictional simulation for educational and artistic purposes. It
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
-**PROJECT AESCULAPIUS** • *Where Order Meets Chaos*
-
-Built with obsession by someone who watched too much cyberpunk and played too many survival horror games.
+**PROJECT AESCULAPIUS** • 
+Built with the obsession of someone raised on dystopian fiction and survival horror. Inspired by the heavy, clunky interfaces of a history I never witnessed, but internalized through the worlds of Cyberpunk, Fallaut, Atomic Heart. An homage to the machinery of survival—where the beauty of analog imperfection meets the cold precision of code.
 
 </div>
+
 
