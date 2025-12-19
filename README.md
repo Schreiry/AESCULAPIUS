@@ -17,6 +17,12 @@
 
 > *"In the space between heartbeat and flatline, the machine makes its judgment."*
 
+<img width="2505" height="1276" alt="изображение" src="https://github.com/user-attachments/assets/4b0d4d09-d35a-499e-b0e5-3f823061a30d" />
+<img width="2499" height="1270" alt="изображение" src="https://github.com/user-attachments/assets/1b737d3c-26d1-4d60-9d74-d13ab16e4712" />
+<img width="2485" height="1261" alt="изображение" src="https://github.com/user-attachments/assets/97b3edf1-4b63-4d40-8feb-f8854052cc9d" />
+
+
+
 ---
 
 ## 🩺 WHAT IS THIS?
@@ -332,5 +338,6 @@ This project is a fictional simulation for educational and artistic purposes. It
 Built with the obsession of someone raised on dystopian fiction and survival horror. Inspired by the heavy, clunky interfaces of a history I never witnessed, but internalized through the worlds of Cyberpunk, Fallaut, Atomic Heart. An homage to the machinery of survival—where the beauty of analog imperfection meets the cold precision of code.
 
 </div>
+
 
 
