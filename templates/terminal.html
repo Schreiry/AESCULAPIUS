@@ -8,178 +8,170 @@
 </head>
 <body>
 
-    <div class="scanlines"></div>
-    <div class="vignette"></div>
-    <div class="blood-drip left"></div>
-    <div class="blood-drip right"></div>
-
-    <div class="crt-container">
-        
-        <div class="panel control-panel">
-            <div class="header-box">
-                <h1>AESCULAPIUS <span class="blink">_v2.0</span></h1>
-                <div class="sub-header">PROTOCOL: OMEGA</div>
-            </div>
-
-            <div class="status-log" id="systemLog">
-                <p>> SYSTEM KERNEL LOADED...</p>
-                <p>> LINKING TO TRIAGE DB...</p>
-                <p>> READY.</p>
-            </div>
-
-            <div class="buttons-container">
-                <button id="chaosBtn" onclick="toggleChaos()">[ START SIMULATION ]</button>
-                <button id="manualBtn" onclick="openManualModal()">[ MANUAL ENTRY ]</button>
-            </div>
+    <div class="monitor-casing">
+        <div class="crt-screen">
             
-            <div class="decoration-text">
-                CAUTION: BIOHAZARD LEVEL 4<br>
-                AUTHORIZED PERSONNEL ONLY
-            </div>
-        </div>
+            <div class="scanlines"></div>   
+            <div class="crt-overlay"></div> 
+            <div class="beam-common scan-beam-1"></div>
+            <div class="beam-common scan-beam-2"></div>
+            <div class="beam-common scan-beam-3"></div>
+            <div class="screen-glass"></div>
 
-        <div class="panel data-panel">
-            <h2>> LIVE SUBJECT STREAM</h2>
-            <div class="table-scroll-wrapper">
-                <table id="triageTable">
-                    <thead>
-                        <tr>
-                            <th>TIME</th>
-                            <th>SUBJECT</th>
-                            <th>DIAGNOSIS</th>
-                            <th>DOCTOR</th>
-                            <th>ROOM</th>
-                            <th>STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <div class="content-layer">
+                
+                <div class="panel control-panel">
+                    <div class="header-box">
+                        <h1>AESCULAPIUS <span class="blink">_ v1.4.2</span></h1>
+                        <div class="sub-header">PROTOCOL: OMEGA // STORAGE: 1000 RECORDS EXPANDED</div>
+                    </div>
+
+                    <div class="status-log" id="systemLog">
+                        <p>> KERNEL UPDATED...</p>
+                        <p>> STORAGE CAPACITY: 1000 UNITS.</p>
+                        <p>> READY.</p>
+                    </div>
+
+                    <div class="buttons-container">
+                        <button id="chaosBtn" onclick="toggleChaos()">[ START SIMULATION ]</button>
+                        <button id="manualBtn" onclick="openManualModal()">[ MANUAL ENTRY ]</button>
+                        <button id="exportBtn" onclick="downloadExcel()" style="border-color: #ffff33; color: #ffff33;">[ SAVE LOGS ]</button>
+                    </div>
+                </div>
+
+                <hr style="border-color: var(--phosphor-dim); border-style: dashed;">
+
+                <div class="panel data-panel">
+                    <h2>> LIVE FEED</h2>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>TIME</th>
+                                <th>SUBJECT</th>
+                                <th>VITALS (HR)</th>
+                                <th>THREAT CLASS</th>
+                                <th>LOCATION</th>
+                                <th>ASSIGNED DOCTOR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monitorTable">
+                            <tr><td colspan="6" style="text-align:center;">... WAITING FOR DATA STREAM ...</td></tr>
                         </tbody>
-                </table>
+                    </table>
+                </div>
+
             </div>
         </div>
     </div>
 
-    <div class="bg-cross"></div>
-
     <div id="manualModal" class="modal hidden">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>> MANUAL OVERRIDE</h3>
-                <span class="close-btn" onclick="closeManualModal()">X</span>
+            <div class="modal-header" style="margin-bottom: 20px; border-bottom: 1px dashed green; display:flex; justify-content:space-between;">
+                <span>> MANUAL_OVERRIDE</span>
+                <span style="cursor:pointer;" onclick="closeManualModal()">[X]</span>
             </div>
             
-            <div class="modal-body">
-                <label>SUBJECT NAME:</label>
-                <input type="text" id="manualName" placeholder="ENTER NAME...">
+            <label>CODENAME / ID:</label>
+            <input type="text" id="manualName" placeholder="ENTER SUBJECT NAME..." autocomplete="off">
+            <label>ASSIGN DOCTOR:</label>
+            <select id="doctorSelect"></select>
 
-                <label>ASSIGN DOCTOR:</label>
-                <select id="doctorSelect"></select>
-
-                <div class="diagnostics-preview">
-                    <p>> PRELIMINARY SCAN:</p>
-                    <ul id="randomSymptoms">
-                        <li>- High Fever detected</li>
-                        <li>- Unknown mutation</li>
-                    </ul>
-                </div>
-
-                <p style="text-align: center; margin-top: 15px;">SELECT PRIORITY CARD:</p>
-                <div class="cards-container">
-                    <button class="card-btn card-green" onclick="submitManual('GREEN')">GREEN</button>
-                    <button class="card-btn card-yellow" onclick="submitManual('YELLOW')">YELLOW</button>
-                    <button class="card-btn card-red" onclick="submitManual('RED')">RED</button>
-                    <button class="card-btn card-black" onclick="submitManual('BLACK')">BLACK</button>
-                </div>
+            <div class="cards-container">
+                <div class="card green" onclick="submitManual('Green')"><div class="icon">OK</div><div>STABLE</div></div>
+                <div class="card yellow" onclick="submitManual('Yellow')"><div class="icon">!</div><div>CAUTION</div></div>
+                <div class="card red" onclick="submitManual('Red')"><div class="icon">X</div><div>CRITICAL</div></div>
+                <div class="card black" onclick="submitManual('Black')"><div class="icon">☠</div><div>MORTAL</div></div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- ЛОГИКА СИМУЛЯЦИИ ---
-        async function toggleChaos() {
-            const btn = document.getElementById('chaosBtn');
-            const response = await fetch('/api/toggle_chaos', { method: 'POST' });
-            const data = await response.json();
-            
-            if (data.status === "ONLINE") {
-                btn.innerText = "[ TERMINATE STREAM ]";
-                btn.classList.add('active');
-            } else {
-                btn.innerText = "[ START SIMULATION ]";
-                btn.classList.remove('active');
-            }
-        }
-
-        async function updateTable() {
+        let updateInterval;
+        
+        async function fetchUpdates() {
             try {
                 const response = await fetch('/api/data');
                 const data = await response.json();
-                const tbody = document.querySelector('#triageTable tbody');
                 
-                // Пересобираем таблицу (но теперь она скроллится)
-                tbody.innerHTML = ''; 
+                const tbody = document.getElementById('monitorTable');
+                tbody.innerHTML = '';
+
                 data.forEach(row => {
                     const tr = document.createElement('tr');
-                    tr.className = `row-${row.color}`;
                     
+                    let rowClass = "row-green";
+                    if(row.color === 'Yellow') rowClass = "row-yellow";
+                    if(row.color === 'Red') rowClass = "row-red";
+                    if(row.color === 'Black') rowClass = "row-black";
+                    
+                    tr.className = rowClass;
+
                     tr.innerHTML = `
                         <td>${row.time}</td>
-                        <td>${row.name}</td>
+                        <td style="font-weight:bold;">${row.name}</td>
+                        <td>${row.hr} BPM</td>
                         <td>${row.diagnosis}</td>
-                        <td>${row.doctor}</td>
-                        <td>${row.room}</td>
-                        <td class="status-cell blink-${row.color}">${row.color}</td>
+                        <td>${row.room || 'WAITING'}</td>
+                        <td>${row.doctor || 'SEARCHING...'}</td>
                     `;
                     tbody.appendChild(tr);
                 });
-            } catch (e) {
-                console.error("Connection error");
+            } catch (e) { console.error("Connection Lost:", e); }
+        }
+
+        async function toggleChaos() {
+            const btn = document.getElementById('chaosBtn');
+            const response = await fetch('/api/toggle_chaos', { method: 'POST' });
+            const res = await response.json();
+            
+            if (res.status) {
+                btn.innerText = "[ STOP SIMULATION ]";
+                btn.style.borderColor = "#ff3333";
+                btn.style.color = "#ff3333";
+                updateInterval = setInterval(fetchUpdates, 1000);
+            } else {
+                btn.innerText = "[ START SIMULATION ]";
+                btn.style.borderColor = "#33ff33";
+                btn.style.color = "#33ff33";
+                clearInterval(updateInterval);
             }
         }
-        
-        setInterval(updateTable, 1000);
 
-        // --- ЛОГИКА РУЧНОГО ВВОДА ---
-        const modal = document.getElementById('manualModal');
+        // --- НОВАЯ ФУНКЦИЯ СКАЧИВАНИЯ ---
+        function downloadExcel() {
+            window.location.href = '/api/export';
+            // Добавляем запись в лог
+            document.getElementById('systemLog').innerHTML += "<p>> DOWNLOADING DATABASE (1000 ROWS)...</p>";
+        }
 
-        async function openManualModal() {
-            modal.classList.remove('hidden');
-            
-            // Грузим врачей
-            const res = await fetch('/api/doctors');
-            const doctors = await res.json();
+        // --- MANUAL LOGIC ---
+        const doctors = [
+            {id: 6, name: "Dr. Hannibal Lecter"}, {id: 7, name: "Dr. House G."},
+            {id: 8, name: "Dr. Watson J."}, {id: 4, name: "Dr. Frankenstein"},
+            {id: 20, name: "AI Unit HAL-9000"}
+        ];
+
+        function openManualModal() {
+            document.getElementById('manualModal').classList.remove('hidden');
             const select = document.getElementById('doctorSelect');
             select.innerHTML = '';
             doctors.forEach(d => {
                 const opt = document.createElement('option');
-                opt.value = d.id;
-                opt.innerText = d.name;
+                opt.value = d.id; opt.innerText = d.name;
                 select.appendChild(opt);
             });
-
-            // Генерируем случайные симптомы для атмосферы
-            const symptoms = ["Coughing Blood", "Pupil Dilation", "Skin Necrosis", "Low Body Temp", "Hallucinations", "Bone Fracture"];
-            const list = document.getElementById('randomSymptoms');
-            list.innerHTML = `<li>- ${symptoms[Math.floor(Math.random()*symptoms.length)]}</li>
-                              <li>- ${symptoms[Math.floor(Math.random()*symptoms.length)]}</li>`;
         }
-
-        function closeManualModal() {
-            modal.classList.add('hidden');
-        }
-
+        function closeManualModal() { document.getElementById('manualModal').classList.add('hidden'); }
         async function submitManual(color) {
             const name = document.getElementById('manualName').value || "Unknown";
             const doctorId = document.getElementById('doctorSelect').value;
-
             await fetch('/api/manual_entry', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ name: name, doctor_id: doctorId, color: color })
             });
-
             closeManualModal();
-            document.getElementById('manualName').value = ''; // очистка
+            document.getElementById('manualName').value = '';
         }
     </script>
 </body>
