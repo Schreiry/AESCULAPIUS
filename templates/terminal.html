@@ -22,13 +22,16 @@
                 
                 <div class="panel control-panel">
                     <div class="header-box">
-                        <h1>AESCULAPIUS <span class="blink">_ v1.4.2</span></h1>
-                        <div class="sub-header">PROTOCOL: OMEGA // STORAGE: 1000 RECORDS EXPANDED</div>
+                        <h1>AESCULAPIUS <span class="blink">_ v1.4.3</span></h1>
+                        <div class="sub-header">PROTOCOL: OMEGA // STORAGE RECORDS EXPANDED</div>
                     </div>
 
                     <div class="status-log" id="systemLog">
+                        <p>> INITIALIZING SYSTEM...</p>
+                        <p>> LOADING MODULES: [██████████] 100%.</p>
+                        <p>> CONNECTING TO DATABASE...</p>
                         <p>> KERNEL UPDATED...</p>
-                        <p>> STORAGE CAPACITY: 1000 UNITS.</p>
+                        <p>> STORAGE CAPACITY: & UNITS.</p>
                         <p>> READY.</p>
                     </div>
 
@@ -146,9 +149,11 @@
 
         // --- MANUAL LOGIC ---
         const doctors = [
-            {id: 6, name: "Dr. Hannibal Lecter"}, {id: 7, name: "Dr. House G."},
-            {id: 8, name: "Dr. Watson J."}, {id: 4, name: "Dr. Frankenstein"},
-            {id: 20, name: "AI Unit HAL-9000"}
+            {id: 1, name: "Dr. Hannibal"}, 
+            {id: 2, name: "Dr. Frankenstein"},
+            {id: 3, name: "Dr. Strange"}, 
+            {id: 4, name: "AI Unit 734"},
+            {id: 5, name: "Dr. House"}
         ];
 
         function openManualModal() {
@@ -165,13 +170,27 @@
         async function submitManual(color) {
             const name = document.getElementById('manualName').value || "Unknown";
             const doctorId = document.getElementById('doctorSelect').value;
-            await fetch('/api/manual_entry', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ name: name, doctor_id: doctorId, color: color })
-            });
-            closeManualModal();
-            document.getElementById('manualName').value = '';
+            
+            try {
+                const response = await fetch('/api/manual_entry', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ name: name, doctor_id: doctorId, color: color })
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('systemLog').innerHTML += `<p>> SUBJECT ADMITTED: ${name} (${color})</p>`;
+                    closeManualModal();
+                    document.getElementById('manualName').value = '';
+                    fetchUpdates(); // Обновляем таблицу сразу
+                } else {
+                    alert('ERROR: Failed to admit subject');
+                }
+            } catch (e) {
+                console.error("Submission Error:", e);
+                alert('ERROR: Connection failed');
+            }
         }
     </script>
 </body>
