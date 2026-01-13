@@ -1,4 +1,4 @@
-UUSE master;
+USE master;
 GO
 
 -- Удаляем старую версию, если есть
@@ -16,16 +16,16 @@ GO
 -- 1. Таблица Палат (Отделения)
 CREATE TABLE Rooms (
     RoomID INT PRIMARY KEY IDENTITY(1,1),
-    RoomName NVARCHAR(100), -- Изолятор, Хирургия, Морг
-    SecurityLevel INT -- Уровень доступа
+    RoomName NVARCHAR(100), -- Isolation Ward, Surgery, Morgue
+    SecurityLevel INT -- Access level
 );
 
 INSERT INTO Rooms (RoomName, SecurityLevel) VALUES 
 ('General Ward A', 1),
 ('Surgery Unit 04', 3),
-('Bio-Isolation Chamber', 5), -- Для чумы и вирусов
+('Bio-Isolation Chamber', 5), -- For plague and viruses
 ('Cryo-Stasis Storage', 4),
-('Morgue Sector Z', 0),       -- Для черного кода
+('Morgue Sector Z', 0),       -- For black code
 ('Psychiatric Ward', 2);
 
 -- 2. Таблица Врачей

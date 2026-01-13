@@ -35,7 +35,12 @@ def get_db_connection():
 # --- Generation Various Patients ---
 def chaos_engine():
     first_names = [
-    "Jessica","Hugo","Estelle","Inès","Anny","Masha","Konstantin","Vera","Natalya","Polina","Liza","Pavel","Karamazov","Alexey","Nikolai","Nastasya","Lev","Andrey","Pyotr","Arkady","Pulcheria","Sofya","Rodion",
+    "Lasha","Valeri","Elene","Gvanca","Vaxtang","Usain","Keanu","Leopold","Flamma","Fides","Maximus","Max",
+    "Maxima","Caecilia","Fausta","Serena","Luna","Aurora","Vesta","Minerva","Constantia","Sapientia","Aemilia",
+    "Octavia","Domitia","Antonia","Livia","Valeria","Flavia","Cornelia","Claudia","Jonas","Daru","Fernand","Yvars",
+    "Marcel","Janine","Lucie","Zagreus","Patrice","Victoria","Diego","Anya","Dora","Stephan","Stepan","Ianus","Jan","Martha","Metellus","Helicon","Caesonia","Scipio","Cherea",
+    "Caligula","Jean-Baptiste","Sisyphus","Cottard","Jean","Raymond","Marie","Meursault","Jessica",
+    "Hugo","Estelle","Inès","Anny","Masha","Konstantin","Vera","Natalya","Polina","Liza","Pavel","","Alexey","Nikolai","Nastasya","Lev","Andrey","Pyotr","Arkady","Pulcheria","Sofya","Rodion",
     "Fyodor","Evelyn","Panam","Judy","Goro","Viktor","Johnny","Jackie","Lawan","Hakon","Jade","Aiden","Kyle","Colonel","Artyom","Vesemir",
     "Yennefer","Triss","Ciri","Geralt","Victor","Zina","Makar", "Varvara", "Katerina", "Leo", 
     "Larisa","Dmitry","Sergey","Anton","Corvo","Grigori","Eli","Gordon","Lorenzo","Alex","Morgan","Ish","Riley","Marlene","Bill",
@@ -54,7 +59,10 @@ def chaos_engine():
     "Larry", "Brenda", "Justin", "Pamela", "Scott", "Nicole", "Brandon", "Emma"
     ]
     last_names = [
-    "Barine","Rigault","Serrano","Garcin","Mercier","Roquentin","Ivanovich","Irtenyev","Levin","Vronsky","Karenin","Karenina","Rostova","Rostov","Tolstoy","Orlov","Devushkin","Alexandrovna","Zverkov","Smerdyakov","Kirillov","Verkhovensky","Stavrogin","Barashkova","Myshkin","Zosimov","Greve","Ivanovna","Marmeladov",
+    "Maxima","Torquatus","Silvanus","Varro","Lentulus","Agrippa","bolt","Reeves","Mersault","Skouratov","Doulebov","Kaliayev","Clamence","Grand","Tarrou","Sintès","Cardona","Karamazov","Barine",
+    "Rigault","Serrano","Garcin","Mercier","Roquentin","Ivanovich","Irtenyev","Levin","Vronsky",
+    "Karenin","Karenina","Rostova","Rostov","Tolstoy","Orlov","Devushkin","Alexandrovna","Zverkov","Smerdyakov","Kirillov","Verkhovensky","Stavrogin","Barashkova",
+    "Myshkin","Zosimov","Greve","Ivanovna","Marmeladov","Voinov", "Livius", "Fabius", "Cassius", "Augustus", "Regulus", "Princeps",
     "Luzhin","Svidrigailov","Razumikhin","Marmeladova","Raskolnikov","Dostoevsky","Palmer","Alvarez","Takemura","Vektor","Silverhand","Welles","Marwey",
     "Caldwell","Crane","Miller","Mel'nikova","Vengerberg","Merigold","Sechenov","Nechayev","Sokolov","Kaldwin","Attano",
     "Kleiner","Vance","Freeman","Calvino","Elazar","Yu","Dixon","Burrell","Miller","Renoir","Camus","de Saint-Exupéry",
