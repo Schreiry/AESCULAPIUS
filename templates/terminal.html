@@ -5,193 +5,420 @@
     <title>AESCULAPIUS: OMEGA PROTOCOL</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/retro_style.css">
+    <script>
+        const USER_ROLE = "{{ user_role }}";
+    </script>
 </head>
 <body>
 
     <div class="monitor-casing">
         <div class="crt-screen">
-            
             <div class="scanlines"></div>   
             <div class="crt-overlay"></div> 
-            <div class="beam-common scan-beam-1"></div>
-            <div class="beam-common scan-beam-2"></div>
-            <div class="beam-common scan-beam-3"></div>
-            <div class="screen-glass"></div>
-
+            
             <div class="content-layer">
                 
                 <div class="panel control-panel">
                     <div class="header-box">
-                        <h1>AESCULAPIUS <span class="blink">_ v1.4.3</span></h1>
-                        <div class="sub-header">PROTOCOL: OMEGA // STORAGE RECORDS EXPANDED</div>
-                    </div>
-
-                    <div class="status-log" id="systemLog">
-                        <p>> INITIALIZING SYSTEM...</p>
-                        <p>> LOADING MODULES: [██████████] 100%.</p>
-                        <p>> CONNECTING TO DATABASE...</p>
-                        <p>> KERNEL UPDATED...</p>
-                        <p>> STORAGE CAPACITY: & UNITS.</p>
-                        <p>> READY.</p>
-                    </div>
-
-                    <div class="buttons-container">
-                        <button id="chaosBtn" onclick="toggleChaos()">[ START SIMULATION ]</button>
-                        <button id="manualBtn" onclick="openManualModal()">[ MANUAL ENTRY ]</button>
-                        <button id="exportBtn" onclick="downloadExcel()" style="border-color: #ffff33; color: #ffff33;">[ SAVE LOGS ]</button>
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div style="flex-grow: 1;">
+                                <h1 style="font-size: 2.5rem;">AESCULAPIUS <span class="blink">_ v2.1 SECURE</span></h1>
+                                <div class="user-badge">
+                                    <div class="sub-header">USER: {{ user_name }} // ROLE: {{ user_role|upper }} // TERMINAL: 04-B</div>
+                                </div>
+                                
+                                <div class="actions" style="margin-top: 15px;">
+                                    {% if user_role in ['Manager'] %}
+                                    <button id="toggleChaosEngineBtn" onclick="toggleSim()" class="btn danger-btn">TOGGLE CHAOS ENGINE</button>
+                                    {% endif %}
+                                    
+                                    <a href="/api/export" target="_blank"><button class="btn">EXPORT DATA</button></a>
+                                    
+                                    {% if user_role in ['Registrar', 'Manager'] %}
+                                    <button onclick="openModal('add')" class="btn">MANUAL ADMIT</button>
+                                    {% endif %}
+                                    
+                                    <a href="/logout"><button class="btn" style="border-color: #555;">LOGOUT</button></a>
+                                </div>
+                            </div>
+                            
+                            <div class="hierarchy-container">
+                                <div style="margin-bottom:5px; font-size:0.8rem; border-bottom:1px solid var(--color-red);">CLEARANCE LEVEL</div>
+                                <div class="h-node {% if user_role == 'Manager' %}active-node{% endif %}">
+                                    HEAD PHYSICIAN <br><span style="font-size:12px">[Full System Access]</span>
+                                </div>
+                                <div class="h-line">|</div>
+                                <div class="h-node {% if user_role == 'Admin' %}active-node{% endif %}">
+                                    DOCTOR <br><span style="font-size:12px">[Patient Data R/W]</span>
+                                </div>
+                                <div class="h-line">|</div>
+                                <div class="h-node {% if user_role == 'Registrar' %}active-node{% endif %}">
+                                    INTERN <br><span style="font-size:12px">[Patient Admit Only]</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <hr style="border-color: var(--phosphor-dim); border-style: dashed;">
-
                 <div class="panel data-panel">
-                    <h2>> LIVE FEED</h2>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>TIME</th>
-                                <th>SUBJECT</th>
-                                <th>VITALS (HR)</th>
-                                <th>THREAT CLASS</th>
-                                <th>LOCATION</th>
-                                <th>ASSIGNED DOCTOR</th>
-                            </tr>
-                        </thead>
-                        <tbody id="monitorTable">
-                            <tr><td colspan="6" style="text-align:center;">... WAITING FOR DATA STREAM ...</td></tr>
-                        </tbody>
-                    </table>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">ID</th>
+                                    <th style="width: 5%;">STAT</th>
+                                    <th style="width: 25%;">CODE NAME</th>
+                                    <th style="width: 20%;">THREAT TYPE</th>
+                                    <th style="width: 15%;">VITALS (HR/O2)</th>
+                                    <th style="width: 20%;">LOCATION / DOC</th>
+                                    <th style="width: 10%;">TIME</th>
+                                    {% if user_role in ['Admin', 'Manager'] %}
+                                    <th>OP</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody id="patientTableBody">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
 
             </div>
         </div>
     </div>
 
-    <div id="manualModal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header" style="margin-bottom: 20px; border-bottom: 1px dashed green; display:flex; justify-content:space-between;">
-                <span>> MANUAL_OVERRIDE</span>
-                <span style="cursor:pointer;" onclick="closeManualModal()">[X]</span>
-            </div>
-            
-            <label>CODENAME / ID:</label>
-            <input type="text" id="manualName" placeholder="ENTER SUBJECT NAME..." autocomplete="off">
-            <label>ASSIGN DOCTOR:</label>
-            <select id="doctorSelect"></select>
+    <div id="patientModalOverlay" class="modal-overlay">
+        <div class="modal-window">
+            <h2 id="modalTitle"></h2>
+            <div class="form-grid">
+                <input type="hidden" id="subjectId">
+                <input type="hidden" id="threatId">
 
-            <div class="cards-container">
-                <div class="card green" onclick="submitManual('Green')"><div class="icon">OK</div><div>STABLE</div></div>
-                <div class="card yellow" onclick="submitManual('Yellow')"><div class="icon">!</div><div>CAUTION</div></div>
-                <div class="card red" onclick="submitManual('Red')"><div class="icon">X</div><div>CRITICAL</div></div>
-                <div class="card black" onclick="submitManual('Black')"><div class="icon">☠</div><div>MORTAL</div></div>
+                <label for="subjectName">SUBJECT NAME:</label>
+                <input type="text" id="subjectName" placeholder="Format: Lastname, Firstname">
+
+                <label for="assignedDoctor">ASSIGNED DOCTOR:</label>
+                <select id="assignedDoctor"></select>
+
+                <label for="assignedRoom">ASSIGNED ROOM:</label>
+                <select id="assignedRoom"></select>
+                
+                <div class="full-width" style="display:flex; gap:20px; grid-column: 1 / -1;">
+                    <div style="flex:1">
+                        <label for="subjectHR" style="text-align:left; padding: 0; margin-bottom: 5px; display:block;">HEART RATE:</label> 
+                        <input type="number" id="subjectHR">
+                    </div>
+                    <div style="flex:1">
+                        <label for="subjectSPO2" style="text-align:left; padding: 0; margin-bottom: 5px; display:block;">SPO2 (%):</label> 
+                        <input type="number" id="subjectSPO2">
+                    </div>
+                </div>
+
+                <label style="grid-column: 1 / -1; text-align: left; color: var(--phosphor-primary);">THREAT LEVEL:</label>
+                <div class="threat-carousel-wrapper" style="grid-column: 1 / -1;">
+                    <button class="carousel-arrow left-arrow" onclick="scrollThreats(-1)">&#9664;</button>
+                    <div id="threatCards" class="cards-container threat-carousel-inner">
+                    </div>
+                    <button class="carousel-arrow right-arrow" onclick="scrollThreats(1)">&#9654;</button>
+                </div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:20px;">
+                <button onclick="closeModal()" class="btn">CANCEL</button>
+                <button id="modalSubmitButton" class="btn edit-btn"></button>
             </div>
         </div>
     </div>
 
     <script>
-        let updateInterval;
-        
+        // --- GLOBAL DATA STORAGE ---
+        let allDoctors = [];
+        let allRooms = [];
+        let allThreats = [];
+
+        // --- FETCH CYCLE ---
         async function fetchUpdates() {
             try {
                 const response = await fetch('/api/data');
+                if(response.status === 403) { window.location.href = '/login'; return; }
+                
                 const data = await response.json();
                 
-                const tbody = document.getElementById('monitorTable');
-                tbody.innerHTML = '';
+                if (JSON.stringify(allThreats) !== JSON.stringify(data.threats)) {
+                    allThreats = data.threats;
+                    populateThreatCards();
+                }
+                allDoctors = data.doctors;
+                allRooms = data.rooms;
+                
+                renderTable(data.patients);
+            } catch (e) {
+                console.error("Connection lost", e);
+            }
+        }
+        setInterval(fetchUpdates, 3000);
+        fetchUpdates();
 
-                data.forEach(row => {
-                    const tr = document.createElement('tr');
-                    
-                    let rowClass = "row-green";
-                    if(row.color === 'Yellow') rowClass = "row-yellow";
-                    if(row.color === 'Red') rowClass = "row-red";
-                    if(row.color === 'Black') rowClass = "row-black";
-                    
-                    tr.className = rowClass;
+        // --- RENDER TABLE ---
+        function renderTable(patients) {
+            const tbody = document.getElementById('patientTableBody');
+            tbody.innerHTML = '';
+            
+            if(patients.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="padding:50px;">NO ACTIVE SIGNALS... SYSTEM STANDBY</td></tr>';
+                return;
+            }
 
-                    tr.innerHTML = `
-                        <td>${row.time}</td>
-                        <td style="font-weight:bold;">${row.name}</td>
-                        <td>${row.hr} BPM</td>
-                        <td>${row.diagnosis}</td>
-                        <td>${row.room || 'WAITING'}</td>
-                        <td>${row.doctor || 'SEARCHING...'}</td>
+            patients.forEach(p => {
+                // p indexes: 0:ID, 1:Name, 2:ThreatName, 3:Color, 4:HR, 5:SPO2, 6:DocName, 7:RoomName, 8:Timestamp, 9: ThreatID, 10: DocID, 11: RoomID
+                const row = document.createElement('tr');
+                
+                const color = p[3] || 'Green';
+                row.className = 'row-' + color.toLowerCase();
+
+                let actionsHtml = '';
+                if (['Admin', 'Manager'].includes(USER_ROLE)) {
+                    const safeData = encodeURIComponent(JSON.stringify(p));
+                    actionsHtml = `
+                        <td>
+                            <button class="mini-btn edit-btn" onclick="openModal('edit', '${safeData}')">EDIT</button>
+                            <button class="mini-btn delete-btn" onclick="deletePatient(${p[0]})">X</button>
+                        </td>
                     `;
-                    tbody.appendChild(tr);
-                });
-            } catch (e) { console.error("Connection Lost:", e); }
+                }
+
+                row.innerHTML = `
+                    <td>${p[0]}</td>
+                    <td><span class="status-dot ${p[3].toLowerCase()}"></span></td>
+                    <td style="text-align:left; padding-left:20px;">${p[1]}</td>
+                    <td>${p[2]}</td>
+                    <td>${p[4]} BPM / ${p[5]}%</td>
+                    <td>${p[7] || 'N/A'}<br><small style="opacity:0.7">${p[6] || 'Unassigned'}</small></td>
+                    <td>${new Date(p[8]).toLocaleTimeString()}</td>
+                    ${actionsHtml ? actionsHtml : ''}
+                `;
+                tbody.appendChild(row);
+            });
         }
 
-        async function toggleChaos() {
-            const btn = document.getElementById('chaosBtn');
-            const response = await fetch('/api/toggle_chaos', { method: 'POST' });
-            const res = await response.json();
+        // --- MODAL MANAGEMENT ---
+        let modalMode = 'add'; // 'add' or 'edit'
+
+        function openModal(mode, encodedData = null) {
+            modalMode = mode;
+            const modal = document.getElementById('patientModalOverlay');
+            document.getElementById('patientModalOverlay').style.display = 'flex';
+
+            // Reset form
+            document.getElementById('subjectId').value = '';
+            document.getElementById('subjectName').value = '';
+            document.getElementById('subjectHR').value = '';
+            document.getElementById('subjectSPO2').value = '';
+            document.getElementById('threatId').value = '';
             
-            if (res.status) {
-                btn.innerText = "[ STOP SIMULATION ]";
-                btn.style.borderColor = "#ff3333";
-                btn.style.color = "#ff3333";
-                updateInterval = setInterval(fetchUpdates, 1000);
+            populateSelect('assignedDoctor', allDoctors);
+            populateSelect('assignedRoom', allRooms);
+            populateThreatCards();
+
+            const submitButton = document.getElementById('modalSubmitButton');
+
+            if (mode === 'add') {
+                document.getElementById('modalTitle').innerText = ">> MANUAL ADMISSION FORM";
+                document.getElementById('subjectName').value = "Unknown Subject";
+                document.getElementById('subjectHR').value = 80;
+                document.getElementById('subjectSPO2').value = 98;
+                submitButton.innerText = "ADMIT SUBJECT";
+                submitButton.onclick = submitAdd;
             } else {
-                btn.innerText = "[ START SIMULATION ]";
-                btn.style.borderColor = "#33ff33";
-                btn.style.color = "#33ff33";
-                clearInterval(updateInterval);
+                const p = JSON.parse(decodeURIComponent(encodedData));
+                // p indexes: 0:ID, 1:Name, 4:HR, 5:SPO2, 9:ThreatID, 10:DocID, 11:RoomID
+                document.getElementById('modalTitle').innerText = `>> EDIT RECORD [ID: ${p[0]}]`;
+                
+                document.getElementById('subjectId').value = p[0];
+                document.getElementById('subjectName').value = p[1];
+                document.getElementById('subjectHR').value = p[4];
+                document.getElementById('subjectSPO2').value = p[5];
+
+                populateSelect('assignedDoctor', allDoctors, p[10]);
+                populateSelect('assignedRoom', allRooms, p[11]);
+                selectThreatCard(p[9]);
+                
+                submitButton.innerText = "CONFIRM UPDATE";
+                submitButton.onclick = submitEdit;
             }
         }
 
-        // --- НОВАЯ ФУНКЦИЯ СКАЧИВАНИЯ ---
-        function downloadExcel() {
-            window.location.href = '/api/export';
-            // Добавляем запись в лог
-            document.getElementById('systemLog').innerHTML += "<p>> DOWNLOADING DATABASE (1000 ROWS)...</p>";
+        function closeModal() {
+            document.getElementById('patientModalOverlay').style.display = 'none';
         }
 
-        // --- MANUAL LOGIC ---
-        const doctors = [
-            {id: 1, name: "Dr. Hannibal"}, 
-            {id: 2, name: "Dr. Frankenstein"},
-            {id: 3, name: "Dr. Strange"}, 
-            {id: 4, name: "AI Unit 734"},
-            {id: 5, name: "Dr. House"}
-        ];
+        async function submitAdd() {
+            const body = {
+                name: document.getElementById('subjectName').value || "Unknown Subject",
+                doctor_id: document.getElementById('assignedDoctor').value,
+                room_id: document.getElementById('assignedRoom').value,
+                threat_id: document.getElementById('threatId').value,
+                hr: document.getElementById('subjectHR').value,
+                spo2: document.getElementById('subjectSPO2').value
+            };
 
-        function openManualModal() {
-            document.getElementById('manualModal').classList.remove('hidden');
-            const select = document.getElementById('doctorSelect');
+            if (!body.threat_id) {
+                alert("ERROR: Threat Level must be selected.");
+                return;
+            }
+            
+            await fetch('/api/add_patient', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            });
+            closeModal();
+            fetchUpdates();
+        }
+
+        async function submitEdit() {
+            const body = {
+                subject_id: document.getElementById('subjectId').value,
+                name: document.getElementById('subjectName').value,
+                doctor_id: document.getElementById('assignedDoctor').value,
+                room_id: document.getElementById('assignedRoom').value,
+                threat_id: document.getElementById('threatId').value,
+                hr: document.getElementById('subjectHR').value,
+                spo2: document.getElementById('subjectSPO2').value,
+            };
+
+             if (!body.threat_id) {
+                alert("ERROR: Threat Level must be selected.");
+                return;
+            }
+
+            const res = await fetch('/api/update_patient', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            });
+            
+            if(res.ok) {
+                closeModal();
+                fetchUpdates();
+            } else {
+                alert("UPDATE FAILED: Access Denied or DB Error");
+            }
+        }
+
+        // --- DELETE FUNCTION ---
+        async function deletePatient(id) {
+            if(!confirm("CONFIRM DELETION of Subject " + id + "? This action is irreversible.")) return;
+            
+            const res = await fetch('/api/delete_patient', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ subject_id: id })
+            });
+            if(res.ok) fetchUpdates();
+            else alert("DELETE FAILED: Access Denied");
+        }
+
+        // --- UI UTILS ---
+        function populateSelect(elemId, items, selectedId = null) {
+            const select = document.getElementById(elemId);
             select.innerHTML = '';
-            doctors.forEach(d => {
+            items.forEach(item => {
                 const opt = document.createElement('option');
-                opt.value = d.id; opt.innerText = d.name;
+                opt.value = item.id;
+                opt.innerText = item.name;
+                if (item.id == selectedId) {
+                    opt.selected = true;
+                }
                 select.appendChild(opt);
             });
         }
-        function closeManualModal() { document.getElementById('manualModal').classList.add('hidden'); }
-        async function submitManual(color) {
-            const name = document.getElementById('manualName').value || "Unknown";
-            const doctorId = document.getElementById('doctorSelect').value;
-            
-            try {
-                const response = await fetch('/api/manual_entry', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ name: name, doctor_id: doctorId, color: color })
+        
+        function scrollThreats(direction) {
+            const container = document.getElementById('threatCards'); // This is now threat-carousel-inner
+            const scrollAmount = 110; // Adjusted from 150 (card width + gap)
+            const glitchDuration = 200; // Milliseconds, should match animation duration
+
+            if (container) {
+                // Apply glitch effect
+                container.classList.add('glitch-on-scroll');
+
+                container.scrollBy({
+                    left: direction * scrollAmount,
+                    behavior: 'smooth'
                 });
-                const result = await response.json();
-                
-                if (result.success) {
-                    document.getElementById('systemLog').innerHTML += `<p>> SUBJECT ADMITTED: ${name} (${color})</p>`;
-                    closeManualModal();
-                    document.getElementById('manualName').value = '';
-                    fetchUpdates(); // Обновляем таблицу сразу
-                } else {
-                    alert('ERROR: Failed to admit subject');
-                }
-            } catch (e) {
-                console.error("Submission Error:", e);
-                alert('ERROR: Connection failed');
+
+                // Remove glitch effect after animation duration
+                setTimeout(() => {
+                    container.classList.remove('glitch-on-scroll');
+                }, glitchDuration);
             }
         }
+
+        function populateThreatCards() {
+            const container = document.getElementById('threatCards');
+            if (!container) return;
+            container.innerHTML = '';
+
+            allThreats.forEach(threat => {
+                const card = document.createElement('div');
+                card.className = `card ${threat.name.toLowerCase()}`;
+                card.innerText = threat.name;
+                card.onclick = () => selectThreatCard(threat.id);
+                container.appendChild(card);
+            });
+        }
+
+        function selectThreatCard(threatId) {
+            document.getElementById('threatId').value = threatId;
+            
+            const container = document.getElementById('threatCards');
+            const cards = container.querySelectorAll('.card');
+            
+            cards.forEach(card => {
+                const cardThreat = allThreats.find(t => t.name.toLowerCase() === card.innerText.toLowerCase());
+                if (cardThreat && cardThreat.id === threatId) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+        }
+        
+        
+        let isChaosEngineActive = localStorage.getItem('chaosEngineActive') === 'true';
+
+        async function toggleSim() {
+            const toggleButton = document.getElementById('toggleChaosEngineBtn');
+            // Optimistically update UI
+            isChaosEngineActive = !isChaosEngineActive;
+            localStorage.setItem('chaosEngineActive', isChaosEngineActive);
+            updateToggleButtonUI();
+
+            // Send request to backend
+            const response = await fetch('/api/toggle_sim', {method:'POST'});
+            if (!response.ok) {
+                // If backend call fails, revert UI state
+                isChaosEngineActive = !isChaosEngineActive;
+                localStorage.setItem('chaosEngineActive', isChaosEngineActive);
+                updateToggleButtonUI();
+                alert('Failed to toggle Chaos Engine status.');
+            }
+        }
+
+        function updateToggleButtonUI() {
+            const toggleButton = document.getElementById('toggleChaosEngineBtn');
+            if (toggleButton) {
+                if (isChaosEngineActive) {
+                    toggleButton.textContent = 'CHAOS ENGINE ACTIVE';
+                    toggleButton.classList.add('btn-active-warn');
+                } else {
+                    toggleButton.textContent = 'TOGGLE CHAOS ENGINE';
+                    toggleButton.classList.remove('btn-active-warn');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', updateToggleButtonUI);
     </script>
 </body>
 </html>

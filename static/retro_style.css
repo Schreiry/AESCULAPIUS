@@ -1,224 +1,503 @@
-/* --- ОСНОВНЫЕ НАСТРОЙКИ --- */
+/* --- MAIN SETTINGS --- */
 :root {
-    --phosphor-primary: #33ff33;    /* Зеленый */
-    --phosphor-dim: #1a801a;
-    --phosphor-glow: #aaffaa;
+    --phosphor-primary: #33ff33;    /* Classic Terminal Green */
+    --phosphor-dim: #1a801a;        /* Dimmed / History */
+    --phosphor-alert: #ff3333;      /* CRITICAL / DEATH */
+    --phosphor-warn: #ffff33;       /* WARNING */
+    --phosphor-dead: #444444;       /* BLACK CODE / INACTIVE */
     
-    /* ЦВЕТА УГРОЗ */
-    --color-red: #ff3333;
-    --color-yellow: #ffff33;
-    --color-dead: #666666; /* Темно-серый для Black Code */
-    
-    --bg-color: #050505;
-    --screen-curve: 2rem;
+    --bg-color: #020202;            /* Deep Void Black */
+    --scanline-color: rgba(0, 0, 0, 0.5);
+    --glass-reflection: rgba(255, 255, 255, 0.02);
 }
 
-body {
-    background-color: #000;
-    color: var(--phosphor-primary);
-    font-family: 'VT323', monospace;
+html, body {
     margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    font-family: 'VT323', monospace; /* Основной шрифт терминала */
+    color: var(--phosphor-primary);
+    overflow: hidden; /* Запрещаем скролл самого окна, скролл будет внутри монитора */
+    user-select: none; /* Текст нельзя выделять, как на реальном оборудовании */
+}
+
+/* --- CRT MONITOR SIMULATION --- */
+.monitor-casing {
+    width: 100vw;
     height: 100vh;
-    overflow: hidden;
+    background: #000;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-.monitor-casing {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    background: #000;
-    overflow: hidden;
-    padding: 2vmin; 
-    box-sizing: border-box;
-}
-
 .crt-screen {
-    position: relative;
     width: 100%;
     height: 100%;
-    background-color: var(--bg-color);
-    border-radius: var(--screen-curve);
-    box-shadow: inset 0 0 6rem rgba(0,0,0,0.9);
+    position: relative;
+    background: radial-gradient(circle, #112211 0%, #000500 100%); /* Глубина экрана */
     overflow: hidden;
-    text-shadow: 0 0 2px var(--phosphor-dim), 0 0 5px var(--phosphor-primary);
-}
-
-.content-layer {
-    position: relative;
-    z-index: 10;
-    height: 100%;
-    width: 100%;
-    padding: 20px;
+    box-shadow: inset 0 0 100px rgba(0,0,0,0.9);
+    padding: 20px; /* Отступ от краев физического экрана */
     box-sizing: border-box;
-    overflow-y: auto;
-    animation: textFlicker 0.1s infinite;
 }
 
-/* Скроллбар */
-.content-layer::-webkit-scrollbar { width: 12px; }
-.content-layer::-webkit-scrollbar-track { background: #001100; border-left: 1px solid var(--phosphor-dim); }
-.content-layer::-webkit-scrollbar-thumb { background: var(--phosphor-primary); border: 1px solid #000; }
-
-/* --- ЭФФЕКТЫ (OVERLAYS) --- */
-
+/* Эффект старого стекла и сканлайнов */
 .scanlines {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: linear-gradient(to bottom, rgba(0,0,0,0) 50%, rgba(0,0,0,0.4) 50%);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0,0,0,0.2) 50%,
+        rgba(0,0,0,0.2)
+    );
     background-size: 100% 4px;
     pointer-events: none;
-    z-index: 50;
+    z-index: 100;
 }
 
 .crt-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle, rgba(51, 255, 51, 0.02) 0%, rgba(0,0,0,0.4) 90%);
     pointer-events: none;
-    z-index: 60;
-    background: rgba(18, 16, 16, 0.1);
-    animation: flicker 0.15s infinite;
+    z-index: 101;
+    animation: flicker 0.15s infinite; /* Легкое мерцание лучевой трубки */
 }
 
-.screen-glass {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 70;
-    pointer-events: none;
-    background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 90%, rgba(0,0,0,1) 100%);
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.8);
+@keyframes flicker {
+    0% { opacity: 0.97; }
+    5% { opacity: 0.95; }
+    10% { opacity: 0.9; }
+    15% { opacity: 0.95; }
+    20% { opacity: 0.99; }
+    50% { opacity: 0.95; }
+    80% { opacity: 0.9; }
+    100% { opacity: 0.97; }
 }
 
-/* --- ТРИ БЕГУЩИХ ЛУЧА (Triple Beam System) --- */
-/* Общий стиль для луча */
-.beam-common {
-    width: 100%;
-    height: 150px; /* Широкая полоса */
-    position: absolute;
-    left: 0;
-    z-index: 55;
-    pointer-events: none;
-    background: linear-gradient(
-        to bottom,
-        rgba(51, 255, 51, 0) 0%,
-        rgba(51, 255, 51, 0.1) 50%, /* Едва заметный */
-        rgba(51, 255, 51, 0) 100%
-    );
+/* --- CONTENT LAYER --- */
+.content-layer {
+    position: relative;
+    z-index: 10;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Луч 1: Медленный и широкий */
-.scan-beam-1 {
-    top: -150px;
-    animation: scanMove 7s linear infinite;
-}
-
-/* Луч 2: Чуть быстрее, с задержкой */
-.scan-beam-2 {
-    top: -150px;
-    animation: scanMove 5s linear infinite;
-    animation-delay: 2s;
-    background: linear-gradient(to bottom, transparent, rgba(51, 255, 51, 0.08) 50%, transparent);
-}
-
-/* Луч 3: Самый быстрый "глитч" луч */
-.scan-beam-3 {
-    top: -150px;
-    animation: scanMove 11s linear infinite; /* Простое число для рассинхрона */
-    animation-delay: 4.5s;
-    background: linear-gradient(to bottom, transparent, rgba(51, 255, 51, 0.05) 50%, transparent);
-}
-
-
-/* --- ИНТЕРФЕЙС --- */
-.header-box {
+/* HEADER: Строгий, военный стиль */
+.system-header {
     border-bottom: 2px solid var(--phosphor-primary);
-    padding-bottom: 10px; margin-bottom: 20px; text-align: center;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    text-transform: uppercase;
 }
-h1 { margin: 0; font-size: 3em; letter-spacing: 5px; text-transform: uppercase; }
-.blink { animation: blinker 1s step-end infinite; }
-.status-log {
-    border: 1px dashed var(--phosphor-dim); padding: 10px; margin-bottom: 20px;
-    background: rgba(0, 20, 0, 0.5); font-size: 1.1em;
+
+.title-block h1 {
+    font-size: 2.5rem;
+    margin: 0;
+    line-height: 1;
+    letter-spacing: 2px;
+    text-shadow: 0 0 5px var(--phosphor-primary);
 }
-.buttons-container { display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; }
-button {
-    background: #000; color: var(--phosphor-primary);
-    border: 2px solid var(--phosphor-primary); padding: 10px 30px;
-    font-family: 'VT323'; font-size: 1.5em; cursor: pointer; transition: all 0.2s;
+
+.title-block .subtitle {
+    font-size: 1rem;
+    color: var(--phosphor-dim);
+    margin-top: 5px;
+}
+
+.system-status {
+    text-align: right;
+    font-size: 1rem;
+}
+
+/* CONTROL BAR */
+.control-bar {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* --- TABLE SYSTEM (THE CORE) --- */
+.data-panel {
+    flex-grow: 1;
+    overflow-y: auto; /* Скролл только внутри данных */
+    border-top: 1px solid var(--phosphor-dim);
+    /* Кастомный скроллбар */
+    scrollbar-width: thin;
+    scrollbar-color: var(--phosphor-dim) #000;
+}
+
+.data-panel::-webkit-scrollbar { width: 8px; }
+.data-panel::-webkit-scrollbar-track { background: #000; }
+.data-panel::-webkit-scrollbar-thumb { background: var(--phosphor-dim); border: 1px solid #000; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1.4rem; /* Крупный, читаемый текст */
+    text-transform: uppercase;
+}
+
+thead {
+    position: sticky;
+    top: 0;
+    background: #000;
+    z-index: 5;
+    border-bottom: 2px solid var(--phosphor-primary);
+}
+
+th {
+    text-align: left;
+    padding: 10px 15px; /* Даем воздух */
+    font-weight: normal;
+    color: var(--phosphor-dim);
+    letter-spacing: 1px;
+}
+
+td {
+    padding: 12px 15px; /* Широкие строки, как ты просил */
+    border-bottom: 1px solid rgba(51, 255, 51, 0.1); /* Еле заметная линия */
+    vertical-align: middle;
+}
+
+/* Эффект наведения - строка подсвечивается как в BIOS */
+tr:hover td {
+    background: rgba(51, 255, 51, 0.1);
+    color: #fff;
+    text-shadow: 0 0 8px var(--phosphor-primary);
+    cursor: crosshair;
+}
+
+/* --- STATUS COLORS (Dynamic) --- */
+.status-Green { color: var(--phosphor-primary); }
+.status-Yellow { color: var(--phosphor-warn); text-shadow: 0 0 5px var(--phosphor-warn); }
+.status-Red { color: var(--phosphor-alert); text-shadow: 0 0 8px var(--phosphor-alert); animation: pulse-red 1s infinite; }
+.status-Black { color: var(--phosphor-dead); text-decoration: line-through; }
+
+@keyframes pulse-red {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+/* --- MODALS (Raw System Windows) --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 20, 0, 0.75);
+    backdrop-filter: blur(3px);
+    z-index: 200;
+    display: none; /* JS toggles this to flex */
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-window {
+    background: #000;
+    border: 1px solid var(--phosphor-primary);
+    padding: 20px 30px;
+    width: 100%;
+    max-width: 650px;
+    box-shadow: 0 0 25px rgba(51, 255, 51, 0.15), inset 0 0 15px rgba(51, 255, 51, 0.1);
+    position: relative;
+    color: var(--phosphor-primary);
+}
+
+.modal-window h2 {
+    margin-top: 0;
+    border-bottom: 1px solid var(--phosphor-dim);
+    padding-bottom: 15px;
+    font-size: 1.8rem;
+    text-shadow: 0 0 5px var(--phosphor-primary);
+}
+
+/* Redefined Form Grid for stability */
+.form-grid {
+    display: grid;
+    grid-template-columns: 180px 1fr; /* Fixed label column, flexible input column */
+    gap: 18px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.form-grid label {
+    text-align: right;
+    padding-right: 15px;
+    font-size: 1.3rem;
+    color: var(--phosphor-dim);
+    text-transform: uppercase;
+}
+
+/* Form inputs styling */
+input[type="text"], input[type="number"], select {
+    background: #080808;
+    border: 1px solid var(--phosphor-dim);
+    color: var(--phosphor-primary);
+    width: 100%;
+    padding: 8px 12px;
+    font-family: 'VT323';
+    font-size: 1.3rem;
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: var(--phosphor-primary);
     box-shadow: 0 0 10px var(--phosphor-dim);
+    background: #000;
 }
-button:hover { background: var(--phosphor-primary); color: #000; box-shadow: 0 0 20px var(--phosphor-primary); }
 
-/* --- ТАБЛИЦА И ПОЛНАЯ ОКРАСКА СТРОК (RESTORED COLORING) --- */
-.data-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.data-table th { text-align: left; border-bottom: 2px solid var(--phosphor-primary); padding: 5px; color: var(--phosphor-glow); }
-.data-table td { padding: 5px; border-bottom: 1px dotted var(--phosphor-dim); transition: color 0.3s; }
+/* Card selection styles */
+.cards-container { 
+    display: flex; 
+    gap: 10px; 
+    justify-content: flex-start; 
+    margin-top: 5px; 
+}
+.card { 
+    border: 1px solid #333; 
+    padding: 12px 5px; 
+    text-align: center; 
+    cursor: pointer; 
+    transition: all 0.2s ease;
+    opacity: 0.5; 
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    background: transparent;
+}
+.card:hover { 
+    opacity: 1; 
+    transform: translateY(-3px);
+    background: rgba(51, 255, 51, 0.1);
+}
+.card.green { color: var(--phosphor-primary); border-color: var(--phosphor-dim); }
+.card.yellow { color: var(--phosphor-warn); border-color: var(--phosphor-warn); }
+.card.red { color: var(--phosphor-alert); border-color: var(--phosphor-alert); }
+.card.black { color: #666; border-color: #666; }
 
-/* Здесь магия: применяем цвет ко ВСЕМ ячейкам (td) внутри строки (tr) с определенным классом.
-   !important гарантирует, что зеленый цвет body будет перекрыт.
-*/
+.card.active {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.05);
+    font-weight: bold;
+    box-shadow: 0 0 15px;
+}
+.card.green.active { box-shadow: 0 0 15px var(--phosphor-primary); background: var(--phosphor-dim);}
+.card.yellow.active { box-shadow: 0 0 15px var(--phosphor-warn); background: #333300;}
+.card.red.active { box-shadow: 0 0 15px var(--phosphor-alert); background: #330000;}
+.card.black.active { box-shadow: 0 0 15px #666; background: #222;}
 
-/* YELLOW (Caution) */
+
+/* Utility classes */
+.blink { animation: blinker 1s linear infinite; }
+@keyframes blinker { 50% { opacity: 0; } }
+
+
+/* --- ROW COLORING LOGIC (TRIAGE) --- */
+/* This ensures the color is applied to all cells in the row */
+
+/* YELLOW (Caution/Viral) */
 tr.row-yellow td {
-    color: var(--color-yellow) !important;
-    text-shadow: 0 0 4px var(--color-yellow) !important;
+    color: var(--phosphor-warn) !important;
+    text-shadow: 0 0 4px var(--phosphor-warn) !important;
 }
 
 /* RED (Critical) */
 tr.row-red td {
-    color: var(--color-red) !important;
-    text-shadow: 0 0 5px var(--color-red), 0 0 10px #880000 !important;
+    color: var(--phosphor-alert) !important;
+    text-shadow: 0 0 5px var(--phosphor-alert), 0 0 10px #880000 !important;
     font-weight: bold;
+    animation: pulse-red 1.5s infinite;
 }
 
-/* BLACK (Dead/Mortal) */
+/* BLACK (Dead/Mortal/Necrotic) */
 tr.row-black td {
-    color: var(--color-dead) !important;
+    color: var(--phosphor-dead) !important;
     text-shadow: none !important;
-    background: rgba(30, 30, 30, 0.3); /* Легкий фон для черного кода */
+    background: rgba(30, 30, 30, 0.3);
 }
 
-/* GREEN (Default) - явно указывать не обязательно, но для чистоты */
+/* GREEN (Stable) */
 tr.row-green td {
     color: var(--phosphor-primary) !important;
 }
 
-
-/* --- МОДАЛКА --- */
-.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; display: flex; justify-content: center; align-items: center; }
-.hidden { display: none !important; }
-.modal-content { background: #001100; border: 2px solid var(--phosphor-primary); padding: 20px; width: 500px; box-shadow: 0 0 30px rgba(51,255,51,0.3); }
-input, select { background: black; color: var(--phosphor-primary); border: 1px solid var(--phosphor-primary); width: 100%; padding: 10px; font-family: 'VT323'; font-size: 1.2em; margin-bottom: 15px; }
-
-/* --- КАРТОЧКИ --- */
-.cards-container { display: flex; gap: 10px; justify-content: space-between; margin-top: 15px; }
-.card { flex: 1; border: 1px solid #333; padding: 10px; text-align: center; cursor: pointer; transition: 0.2s; opacity: 0.7; }
-.card:hover { opacity: 1; transform: scale(1.05); }
-.card.green { color: var(--phosphor-primary); border-color: var(--phosphor-primary); }
-.card.yellow { color: var(--color-yellow); border-color: var(--color-yellow); }
-.card.red { color: var(--color-red); border-color: var(--color-red); }
-.card.black { color: #888; border-color: #888; }
-
-
-/* --- АНИМАЦИИ --- */
-@keyframes scanMove {
-    0% { top: -20%; opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { top: 110%; opacity: 0; }
+/* --- HIERARCHY & USER BADGE --- */
+.user-badge {
+    border: 1px solid var(--phosphor-dim);
+    padding: 5px 10px;
+    margin-top: 5px;
+    background: rgba(51, 255, 51, 0.05);
+    display: inline-block;
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.5);
 }
 
-@keyframes flicker {
-    0% { opacity: 0.97; } 50% { opacity: 0.95; } 100% { opacity: 0.97; }
+.hierarchy-container {
+    text-align: right;
+    font-size: 1rem;
+    text-transform: uppercase;
+    color: var(--phosphor-dim);
+    margin-left: 20px;
 }
 
-@keyframes textFlicker {
-    0% { opacity: 1; }
-    50% { opacity: 0.9; transform: translateX(0.3px); }
-    52% { opacity: 0.8; transform: translateX(-0.3px); }
-    100% { opacity: 1; }
+.h-node {
+    letter-spacing: 1px;
+    line-height: 1.1;
+    margin-bottom: 2px;
+    padding: 2px 5px;
+    border: 1px solid transparent;
 }
 
-@keyframes blinker { 50% { opacity: 0; } }
+.h-line {
+    font-size: 0.8rem;
+    margin: -5px 0;
+}
+
+.h-node.active-node {
+    color: var(--phosphor-warn);
+    border: 1px solid var(--phosphor-warn);
+    background: rgba(255, 255, 51, 0.1);
+    animation: glow 1.5s infinite alternate;
+    text-shadow: 0 0 5px var(--phosphor-warn);
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 5px rgba(255, 255, 51, 0.2), inset 0 0 5px rgba(255, 255, 51, .1);
+    }
+    to {
+        box-shadow: 0 0 15px rgba(255, 255, 51, 0.6), inset 0 0 8px rgba(255, 255, 51, 0.3);
+    }
+}
+
+/* --- THREAT CAROUSEL STYLES --- */
+.threat-carousel-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between arrows and carousel */
+    margin-top: 10px;
+    grid-column: 1 / -1; /* Ensure it spans full width in the grid */
+    overflow: hidden; /* Hide anything that goes beyond the wrapper's bounds */
+}
+
+.threat-carousel-inner {
+    display: flex;
+    overflow-x: scroll; /* Enable horizontal scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
+    scroll-behavior: smooth; /* Smooth scroll when buttons are clicked */
+    flex-grow: 1; /* Allow inner container to take available space */
+    padding-bottom: 5px; /* To prevent content from being hidden by scrollbar on some systems */
+
+    /* Hide scrollbar for a cleaner look */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.threat-carousel-inner::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.threat-carousel-inner .card {
+    flex-shrink: 0; /* Prevent cards from shrinking */
+    width: 120px; /* Adjust card width as needed */
+    margin-right: 10px; /* Space between cards */
+}
+
+.threat-carousel-inner .card:last-child {
+    margin-right: 0; /* No margin on the last card */
+}
+
+.carousel-arrow {
+    background: transparent;
+    border: 1px solid var(--phosphor-primary);
+    color: var(--phosphor-primary);
+    padding: 8px 12px;
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.1s;
+    flex-shrink: 0; /* Prevent arrows from shrinking */
+}
+
+.carousel-arrow:hover {
+    background: var(--phosphor-primary);
+    color: #000;
+    box-shadow: 0 0 10px var(--phosphor-primary);
+}
+
+/* --- CRT Scroll Glitch Animation --- */
+@keyframes crt-glitch-scroll {
+    0% {
+        transform: translate(0, 0);
+        opacity: 1;
+        filter: brightness(1) contrast(1);
+    }
+    10% {
+        transform: translate(2px, -1px) scaleY(0.98);
+        opacity: 0.8;
+        filter: brightness(1.2) contrast(1.1);
+    }
+    20% {
+        transform: translate(-3px, 2px) scaleY(1.02);
+        opacity: 1;
+        filter: brightness(0.8) contrast(0.9);
+    }
+    30% {
+        transform: translate(1px, -2px) scaleY(0.99);
+        opacity: 0.9;
+        filter: brightness(1.1) contrast(1.05);
+    }
+    100% {
+        transform: translate(0, 0);
+        opacity: 1;
+        filter: brightness(1) contrast(1);
+    }
+}
+
+.glitch-on-scroll {
+    animation: crt-glitch-scroll 0.2s linear forwards; /* Apply glitch for a short duration */
+}
+
+/* --- Global Button Styling for Retro Look (User Request) --- */
+button, input[type="submit"] {
+    background: #000;
+    border: 1px solid var(--phosphor-primary);
+    color: var(--phosphor-primary);
+    font-family: 'VT323', monospace;
+    border-radius: 0; /* Remove rounded corners */
+    cursor: pointer;
+    text-transform: uppercase;
+    padding: 8px 15px; /* Consistent padding */
+    font-size: 1.2rem; /* Consistent font size */
+    transition: all 0.1s;
+}
+
+button:hover, input[type="submit"]:hover {
+    background: var(--phosphor-primary);
+    color: #000;
+    box-shadow: 0 0 15px var(--phosphor-primary);
+}
+
+/* Style for Chaos Engine Active button */
+.btn-active-warn {
+    background: var(--phosphor-warn) !important;
+    border-color: var(--phosphor-warn) !important;
+    color: #000 !important;
+    box-shadow: 0 0 15px var(--phosphor-warn) !important;
+}

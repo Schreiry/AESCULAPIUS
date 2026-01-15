@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AESCULAPIUS: AUTH</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/retro_style.css">
+    <style>
+        .login-container {
+            width: 400px;
+            margin: auto;
+            border: 2px solid var(--phosphor-primary);
+            padding: 40px;
+            background: rgba(0, 20, 0, 0.9);
+            box-shadow: 0 0 20px var(--phosphor-dim);
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+        .login-input {
+            background: #000;
+            color: var(--phosphor-primary);
+            border: 1px solid var(--phosphor-dim);
+            width: 90%;
+            padding: 10px;
+            font-family: 'VT323';
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        .login-btn {
+            /* Now handled by global button styles */
+        }
+        .login-btn:hover {
+            /* Now handled by global button:hover styles */
+        }
+        .blink-text { animation: blink 1s infinite; }
+        .error-msg { color: var(--color-red); margin-bottom: 15px; border: 1px solid var(--color-red); padding: 5px; }
+    </style>
+</head>
+<body>
+    <div class="monitor-casing">
+        <div class="crt-screen">
+            <div class="scanlines"></div>   
+            <div class="crt-overlay"></div> 
+            
+            <div class="content-layer" style="display:flex; height:100%; align-items:center; justify-content:center;">
+                <div class="login-container">
+                    <h1 style="font-size: 3rem; margin-top: 0;">AESCULAPIUS</h1>
+                    <p class="blink-text">> AUTHENTICATION REQUIRED_</p>
+                    
+                    {% if error %}
+                    <div class="error-msg">ERROR: {{ error }}</div>
+                    {% endif %}
+
+                    <form method="POST">
+                        <input type="text" name="username" class="login-input" placeholder="USERNAME" required autofocus autocomplete="off">
+                        <input type="password" name="password" class="login-input" placeholder="PASSWORD" required>
+                        <button type="submit" class="login-btn">LOGIN</button>
+                    </form>
+                    
+                    <div style="margin-top: 20px; font-size: 0.8rem; color: #555;">
+                        OMEGA PROTOCOL // SECURE TERMINAL
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
