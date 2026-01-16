@@ -4,13 +4,15 @@ import random
 import pyodbc
 import csv
 import io
+import datetime
 from functools import wraps
 from flask import Flask, render_template, jsonify, request, make_response, session, redirect, url_for
 
 app = Flask(__name__)
 app.secret_key = 'OMEGA_PROTOCOL_SECRET_KEY_XY99' 
 
-# --- Server Configuration ---
+# --- КОНФИГУРАЦИЯ СЕРВЕРА ---
+# Убедись, что имя сервера верное
 YOUR_SERVER_NAME = r'DESKTOP-T9D302K\SQLEXPRESS' 
 # YOUR_SERVER_NAME = r'DGSurface\SQLEXPRESS' 
 
@@ -19,290 +21,433 @@ CONN_STR = (
     f'SERVER={YOUR_SERVER_NAME};'
     r'DATABASE=AESCULAPIUS;'
     r'Trusted_Connection=yes;'
-    r'TrustServerCertificate=yes;' 
+    r'TrustServerCertificate=yes;'
 )
 
-SIMULATION_ACTIVE = True  # Auto-start data generation
+SIMULATION_ACTIVE = True 
+
+# --- СПИСКИ ИМЕН ---
+FIRST_NAMES = [
+    "Lasha","Valeri","Elene","Gvanca","Vaxtang","Usain","Keanu","Leopold","Flamma","Fides","Maximus","Max",
+    "Maxima","Caecilia","Fausta","Serena","Luna","Aurora","Vesta","Minerva","Constantia","Sapientia","Aemilia",
+    "Octavia","Domitia","Antonia","Livia","Valeria","Flavia","Cornelia","Claudia","Jonas","Daru","Fernand","Yvars",
+    "Marcel","Janine","Lucie","Zagreus","Patrice","Victoria","Diego","Anya","Dora","Stephan","Stepan","Ianus","Jan","Martha","Metellus","Helicon","Caesonia","Scipio","Cherea",
+    "Caligula","Jean-Baptiste","Sisyphus","Cottard","Jean","Raymond","Marie","Meursault","Jessica",
+    "Hugo","Estelle","Inès","Anny","Masha","Konstantin","Vera","Natalya","Polina","Liza","Pavel","Alexey","Nikolai","Nastasya","Lev","Andrey","Pyotr","Arkady","Pulcheria","Sofya","Rodion",
+    "Fyodor","Evelyn","Panam","Judy","Goro","Viktor","Johnny","Jackie","Lawan","Hakon","Jade","Aiden","Kyle","Colonel","Artyom","Vesemir",
+    "Yennefer","Triss","Ciri","Geralt","Victor","Zina","Makar", "Varvara", "Katerina", "Leo", 
+    "Larisa","Dmitry","Sergey","Anton","Corvo","Grigori","Eli","Gordon","Lorenzo","Alex","Morgan","Ish","Riley","Marlene","Bill",
+    "Frank","Jordan","Nora","Manny","Mel","Owen","Dina","Maria","Isaac","Henry","Jerry","Servopoulos","Tess",
+    "Tommy","Abby","Ellie","Joel","Aline","Esquie","Sophie","Monoco","Verso","Sciel","Albert",
+    "Antoine","Jean-Paul","Jean-Jacques","Gustave","Maëlle","Mikhail","Anni-Frid","Benny","Bjorn",
+    "Agnetha","Tamara","Mira", "Alexandre","James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda",
+    "David", "Elizabeth", "William", "Barbara", "Richard", "Susan", "Joseph", "Jessica",
+    "Thomas", "Sarah", "Charles", "Karen", "Christopher", "Nancy", "Daniel", "Lisa",
+    "Matthew", "Betty", "Anthony", "Margaret", "Mark", "Sandra", "Donald", "Ashley",
+    "Steven", "Kimberly", "Paul", "Emily", "Andrew", "Donna", "Joshua", "Michelle",
+    "Kenneth", "Dorothy", "Kevin", "Carol", "Brian", "Amanda", "George", "Melissa",
+    "Edward", "Deborah", "Ronald", "Stephanie", "Timothy", "Rebecca", "Jason", "Sharon",
+    "Jeffrey", "Laura", "Ryan", "Cynthia", "Jacob", "Kathleen", "Gary", "Amy",
+    "Nicholas", "Shirley", "Eric", "Angela", "Jonathan", "Helen", "Stephen", "Anna",
+    "Larry", "Brenda", "Justin", "Pamela", "Scott", "Nicole", "Brandon", "Emma"
+]
+
+LAST_NAMES = [
+    "Maxima","Torquatus","Silvanus","Varro","Lentulus","Agrippa","bolt","Reeves","Mersault","Skouratov","Doulebov","Kaliayev","Clamence","Grand","Tarrou","Sintès","Cardona","Karamazov","Barine",
+    "Rigault","Serrano","Garcin","Mercier","Roquentin","Ivanovich","Irtenyev","Levin","Vronsky",
+    "Karenin","Karenina","Rostova","Rostov","Tolstoy","Orlov","Devushkin","Alexandrovna","Zverkov","Smerdyakov","Kirillov","Verkhovensky","Stavrogin","Barashkova",
+    "Myshkin","Zosimov","Greve","Ivanovna","Marmeladov","Voinov", "Livius", "Fabius", "Cassius", "Augustus", "Regulus", "Princeps",
+    "Luzhin","Svidrigailov","Razumikhin","Marmeladova","Raskolnikov","Dostoevsky","Palmer","Alvarez","Takemura","Vektor","Silverhand","Welles","Marwey",
+    "Caldwell","Crane","Miller","Mel'nikova","Vengerberg","Merigold","Sechenov","Nechayev","Sokolov","Kaldwin","Attano",
+    "Kleiner","Vance","Freeman","Calvino","Elazar","Yu","Dixon","Burrell","Miller","Renoir","Camus","de Saint-Exupéry",
+    "Sartre","Rousseau","Verne","Borde","Gorshenev","Lyngstad","Andersson","Unveaus","Faltskog","Mizandari","Tinikashvili",
+    "Putkaradze","Tsurtsumia","Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis",
+    "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas",
+    "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White",
+    "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young",
+    "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores",
+    "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell",
+    "Carter", "Roberts", "Gomez", "Phillips", "Evans", "Turner", "Diaz", "Parker"
+]
+
+# --- СЛОВАРЬ БОЛЕЗНЕЙ ---
+FULL_THREAT_DICT = {
+    1: "Mild Influenza",
+    2: "Chronic Bronchitis", 3: "Fractured Rib", 4: "Concussion (Grade 1)", 5: "Severe Dehydration",
+    6: "Heat Exhaustion", 7: "Hypothermia (Stage 1)", 8: "Food Poisoning", 9: "Allergic Reaction",
+    10: "Sleep Deprivation Psychosis", 11: "Panic Attack", 12: "Laceration (Non-Arterial)",
+    13: "Sprained Ankle", 14: "Migraine (Cluster)", 15: "Vertigo", 16: "Hyperventilation",
+    17: "Low Blood Sugar", 18: "High Blood Pressure", 19: "Vitamin Deficiency", 20: "Exhaustion",
+    21: "Arterial Bleeding", 22: "Punctured Lung", 23: "Neural Rot", 24: "Cyber-Psychosis",
+    25: "Radiation Sickness (Acute)", 26: "Bio-Plague (Early Stage)", 27: "Internal Hemorrhage",
+    28: "Compound Fracture", 29: "Kidney Failure", 30: "Cardiac Arrest Risk",
+    31: "Severe Burns (3rd Degree)", 32: "Toxic Chemical Exposure", 33: "Blood Toxicity",
+    34: "Cerebral Edema", 35: "Lung Collapse", 36: "Spinal Severance", 37: "Brain Aneurysm",
+    38: "Flesh-Eating Bacteria", 39: "Parasitic Host", 40: "Cryo-Burn",
+    41: "Necrotic Plague (Black Code)", 42: "Total Brain Death", 43: "Z-Class Pathogen",
+    44: "Systemic Shutdown", 45: "Rigor Mortis Stage 1", 46: "Decapitation",
+    47: "Incineration", 48: "Genetic Unraveling", 49: "Soul Fragmentation", 50: "Void Exposure"
+}
 
 def get_db_connection():
     try:
         conn = pyodbc.connect(CONN_STR, timeout=5)
-        print("[SQL] Connection successful")
         return conn
     except Exception as e:
         print(f"[SQL ERROR] Connection failed: {e}")
         return None
 
-# --- Security Decorators ---
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
-            return redirect(url_for('login'))
+            return redirect(url_for('login_page')) # Перенаправляем на страницу входа
         return f(*args, **kwargs)
     return decorated_function
 
-def role_required(allowed_roles):
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if 'role' not in session or session['role'] not in allowed_roles:
-                return jsonify({'error': 'ACCESS DENIED: Insufficient Clearance Level'}), 403
-            return f(*args, **kwargs)
-        return decorated_function
-    return decorator
+# --- CHAOS ENGINE ---
+all_doctor_ids = []
+all_room_ids = []
 
-# --- CHAOS ENGINE (UPDATED WITH FULL NAMES) ---
 def chaos_engine():
-    print("[CHAOS ENGINE] Started successfully")
-    first_names = [
-        "Lasha","Valeri","Elene","Gvanca","Vaxtang","Usain","Keanu","Leopold","Flamma","Fides","Maximus","Max",
-        "Maxima","Caecilia","Fausta","Serena","Luna","Aurora","Vesta","Minerva","Constantia","Sapientia","Aemilia",
-        "Octavia","Domitia","Antonia","Livia","Valeria","Flavia","Cornelia","Claudia","Jonas","Daru","Fernand","Yvars",
-        "Marcel","Janine","Lucie","Zagreus","Patrice","Victoria","Diego","Anya","Dora","Stephan","Stepan","Ianus","Jan","Martha","Metellus","Helicon","Caesonia","Scipio","Cherea",
-        "Caligula","Jean-Baptiste","Sisyphus","Cottard","Jean","Raymond","Marie","Meursault","Jessica",
-        "Hugo","Estelle","Inès","Anny","Masha","Konstantin","Vera","Natalya","Polina","Liza","Pavel","Alexey","Nikolai","Nastasya","Lev","Andrey","Pyotr","Arkady","Pulcheria","Sofya","Rodion",
-        "Fyodor","Evelyn","Panam","Judy","Goro","Viktor","Johnny","Jackie","Lawan","Hakon","Jade","Aiden","Kyle","Colonel","Artyom","Vesemir",
-        "Yennefer","Triss","Ciri","Geralt","Victor","Zina","Makar", "Varvara", "Katerina", "Leo", 
-        "Larisa","Dmitry","Sergey","Anton","Corvo","Grigori","Eli","Gordon","Lorenzo","Alex","Morgan","Ish","Riley","Marlene","Bill",
-        "Frank","Jordan","Nora","Manny","Mel","Owen","Dina","Maria","Isaac","Henry","Jerry","Servopoulos","Tess",
-        "Tommy","Abby","Ellie","Joel","Aline","Esquie","Sophie","Monoco","Verso","Sciel","Albert",
-        "Antoine","Jean-Paul","Jean-Jacques","Gustave","Maëlle","Mikhail","Anni-Frid","Benny","Bjorn",
-        "Agnetha","Tamara","Mira", "Alexandre","James", "Mary", "Robert", "Patricia", "John", "Jennifer", "Michael", "Linda",
-        "David", "Elizabeth", "William", "Barbara", "Richard", "Susan", "Joseph", "Jessica",
-        "Thomas", "Sarah", "Charles", "Karen", "Christopher", "Nancy", "Daniel", "Lisa",
-        "Matthew", "Betty", "Anthony", "Margaret", "Mark", "Sandra", "Donald", "Ashley",
-        "Steven", "Kimberly", "Paul", "Emily", "Andrew", "Donna", "Joshua", "Michelle",
-        "Kenneth", "Dorothy", "Kevin", "Carol", "Brian", "Amanda", "George", "Melissa",
-        "Edward", "Deborah", "Ronald", "Stephanie", "Timothy", "Rebecca", "Jason", "Sharon",
-        "Jeffrey", "Laura", "Ryan", "Cynthia", "Jacob", "Kathleen", "Gary", "Amy",
-        "Nicholas", "Shirley", "Eric", "Angela", "Jonathan", "Helen", "Stephen", "Anna",
-        "Larry", "Brenda", "Justin", "Pamela", "Scott", "Nicole", "Brandon", "Emma"
-    ]
-
-    last_names = [
-        "Maxima","Torquatus","Silvanus","Varro","Lentulus","Agrippa","bolt","Reeves","Mersault","Skouratov","Doulebov","Kaliayev","Clamence","Grand","Tarrou","Sintès","Cardona","Karamazov","Barine",
-        "Rigault","Serrano","Garcin","Mercier","Roquentin","Ivanovich","Irtenyev","Levin","Vronsky",
-        "Karenin","Karenina","Rostova","Rostov","Tolstoy","Orlov","Devushkin","Alexandrovna","Zverkov","Smerdyakov","Kirillov","Verkhovensky","Stavrogin","Barashkova",
-        "Myshkin","Zosimov","Greve","Ivanovna","Marmeladov","Voinov", "Livius", "Fabius", "Cassius", "Augustus", "Regulus", "Princeps",
-        "Luzhin","Svidrigailov","Razumikhin","Marmeladova","Raskolnikov","Dostoevsky","Palmer","Alvarez","Takemura","Vektor","Silverhand","Welles","Marwey",
-        "Caldwell","Crane","Miller","Mel'nikova","Vengerberg","Merigold","Sechenov","Nechayev","Sokolov","Kaldwin","Attano",
-        "Kleiner","Vance","Freeman","Calvino","Elazar","Yu","Dixon","Burrell","Miller","Renoir","Camus","de Saint-Exupéry",
-        "Sartre","Rousseau","Verne","Borde","Gorshenev","Lyngstad","Andersson","Unveaus","Faltskog","Mizandari","Tinikashvili",
-        "Putkaradze","Tsurtsumia","Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis",
-        "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas",
-        "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White",
-        "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young",
-        "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores",
-        "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell",
-        "Carter", "Roberts", "Gomez", "Phillips", "Evans", "Turner", "Diaz", "Parker"
-    ]
+    global SIMULATION_ACTIVE, all_doctor_ids, all_room_ids
+    print(">>> CHAOS ENGINE: ONLINE & RUNNING <<<")
     
+    # Fetch all doctor and room IDs once at startup
+    initial_conn = get_db_connection()
+    if initial_conn:
+        try:
+            initial_cursor = initial_conn.cursor()
+            initial_cursor.execute("SELECT DoctorID FROM Doctors")
+            all_doctor_ids = [row.DoctorID for row in initial_cursor.fetchall()]
+            initial_cursor.execute("SELECT RoomID FROM Rooms")
+            all_room_ids = [row.RoomID for row in initial_cursor.fetchall()]
+            print(f">>> CHAOS ENGINE: Loaded {len(all_doctor_ids)} Doctors and {len(all_room_ids)} Rooms <<<")
+        except Exception as e:
+            print(f"[CHAOS ERROR] Failed to load initial Doctors/Rooms: {e}")
+        finally:
+            initial_conn.close()
+
     while True:
         if SIMULATION_ACTIVE:
             conn = get_db_connection()
             if conn:
                 try:
                     cursor = conn.cursor()
+                    roll = random.random()
                     
-                    if random.random() < 0.3:
-                        fname = random.choice(first_names)
-                        lname = random.choice(last_names)
-                        name = f"{fname} {lname}" 
-                        
-                        # 35% GREEN (ThreatID 1-2), 30% YELLOW (ThreatID 3-4), 25% RED (ThreatID 5-7), 10% BLACK (ThreatID 8-10)
-                        threat_roll = random.random()
-                        if threat_roll < 0.35:
-                            threat = random.choice([1, 2])  # Green threats
-                            hr = random.randint(60, 100)  # Normal heart rate
-                            spo2 = random.randint(95, 100)  # High oxygen saturation
-                        elif threat_roll < 0.65:
-                            threat = random.choice([3, 4])  # Yellow threats
-                            hr = random.randint(100, 130)  # Elevated heart rate
-                            spo2 = random.randint(85, 95)  # Moderate oxygen
-                        elif threat_roll < 0.90:
-                            threat = random.choice([5, 6, 7])  # Red threats
-                            hr = random.randint(140, 160)  # High heart rate - TRIGGERS RED
-                            spo2 = random.randint(65, 75)  # Low oxygen - TRIGGERS RED
+                    threat_id = 1
+                    heart_rate = 80
+                    spo2 = 98
+                    
+                    if roll < 0.35: 
+                        threat_id = 1
+                        heart_rate = random.randint(60, 90)
+                        spo2 = random.randint(95, 100)
+                    elif roll < 0.65:
+                        threat_id = random.randint(2, 20)
+                        heart_rate = random.randint(90, 130)
+                        spo2 = random.randint(88, 95)
+                    elif roll < 0.90:
+                        threat_id = random.randint(21, 40)
+                        heart_rate = random.randint(135, 170)
+                        spo2 = random.randint(70, 85)
+                    else:
+                        threat_id = random.randint(41, 50)
+                        if random.random() > 0.5:
+                            heart_rate = 0 
+                            spo2 = 0
                         else:
-                            threat = random.choice([8, 9, 10])  # Black threats
-                            hr = random.randint(0, 40) if random.random() < 0.3 else random.randint(160, 180)  # Cardiac arrest or extreme HR
-                            spo2 = random.randint(40, 65)  # Critical oxygen levels
-                        
-                        doc = random.randint(1, 5)  # 5 doctors in DB
-                        room = random.randint(1, 6)  # 6 rooms in DB
-                        
-                        cursor.execute("""
-                            INSERT INTO Subjects (CodeName, AssignedThreatID, AssignedDoctorID, AssignedRoomID, HeartRate, SPO2)
-                            VALUES (?, ?, ?, ?, ?, ?)
-                        """, (name, threat, doc, room, hr, spo2))
-                        conn.commit()
-                        threat_names = {1:"Mild Influenza", 2:"Panic Attack", 3:"Fracture", 4:"Chemical Burn", 5:"Radiation", 6:"Viral", 7:"Plague", 8:"Arrest", 9:"Decomp", 10:"Neural"}
-                        print(f"[CHAOS ENGINE] Inserted: {name} (Threat: {threat_names.get(threat, 'Unknown')}) HR:{hr} SPO2:{spo2}")
+                            heart_rate = random.randint(180, 220)
+                            spo2 = random.randint(40, 60)
+
+                    fname = random.choice(FIRST_NAMES)
+                    lname = random.choice(LAST_NAMES)
+                    full_name = f"{fname} {lname}"
                     
-                    cursor.execute("UPDATE Subjects SET HeartRate = HeartRate + CAST((RAND()*10)-5 AS INT), SPO2 = SPO2 + CAST((RAND()*4)-2 AS INT)")
+                    threat_name = FULL_THREAT_DICT.get(threat_id, "Unknown Threat")
+                    print(f"[CHAOS] Spawning: {full_name} | ID: {threat_id} ({threat_name}) | Roll: {roll:.2f}")
+
+                    # Randomly assign a doctor and room
+                    assigned_doctor_id = random.choice(all_doctor_ids) if all_doctor_ids else None
+                    assigned_room_id = random.choice(all_room_ids) if all_room_ids else None
+
+                    cursor.execute("""
+                        INSERT INTO Subjects (CodeName, AssignedThreatID, HeartRate, SPO2, AssignedDoctorID, AssignedRoomID, ArrivalTimestamp)
+                        VALUES (?, ?, ?, ?, ?, ?, GETDATE())
+                    """, (full_name, threat_id, heart_rate, spo2, assigned_doctor_id, assigned_room_id))
                     conn.commit()
-                    conn.close()
                 except Exception as e:
-                    print(f"[CHAOS ENGINE ERROR] {e}")
-                    if conn: conn.close()
-            else:
-                print("[CHAOS ENGINE WARNING] Could not connect to database")
-        time.sleep(3) 
+                    print(f"[CHAOS ERROR] {e}")
+                finally:
+                    conn.close()
+            time.sleep(random.uniform(2, 6))
+        else:
+            time.sleep(2)
 
-t = threading.Thread(target=chaos_engine, daemon=True)
-t.start()
+threading.Thread(target=chaos_engine, daemon=True).start()
 
-# --- ROUTES ---
+# --- МАРШРУТЫ (ИСПРАВЛЕНЫ) ---
 
-@app.route('/')
-def index():
-    if 'user_id' in session: return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+@app.route('/', methods=['GET'])
+def login_page():
+    # Главная страница теперь рендерит LOGIN.HTML, а не терминал
+    return render_template('login.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        
-        conn = get_db_connection()
-        if conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT UserID, Role, DisplayName FROM Users WHERE Username=? AND PasswordHash=?", (username, password))
-            user = cursor.fetchone()
-            conn.close()
-            
-            if user:
-                session['user_id'] = user.UserID
-                session['role'] = user.Role
-                session['name'] = user.DisplayName
-                return redirect(url_for('dashboard'))
-            else:
-                error = "INVALID CREDENTIALS. ACCESS DENIED."
+@app.route('/login_action', methods=['POST'])
+def login_action():
+    # Получаем данные из формы
+    username = request.form.get('username')
+    password = request.form.get('password')
     
-    return render_template('login.html', error=error)
+    conn = get_db_connection()
+    if not conn:
+        return render_template('login.html', error="DATABASE OFFLINE")
+    
+    try:
+        cursor = conn.cursor()
+        # Проверяем пользователя в БД
+        cursor.execute("SELECT UserID, Role, DisplayName FROM Users WHERE Username=? AND PasswordHash=?", (username, password))
+        user = cursor.fetchone()
+        
+        if user:
+            session['user_id'] = user[0]
+            session['role'] = user[1]
+            session['name'] = user[2]
+            # При успехе перенаправляем на монитор
+            return redirect(url_for('monitor'))
+        else:
+            return render_template('login.html', error="INVALID CREDENTIALS")
+    finally:
+        conn.close()
 
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect(url_for('login'))
-
-@app.route('/dashboard')
+@app.route('/monitor')
 @login_required
-def dashboard():
-    return render_template('terminal.html', user_role=session['role'], user_name=session['name'])
+def monitor():
+    # Терминал доступен только после входа
+    return render_template('terminal.html', user_name=session.get('name'), user_role=session.get('role'))
 
-# --- API ---
+@app.route('/api/subjects')
+@login_required
+def get_subjects():
+    """
+    Возвращает JSON со списком пациентов.
+    Берет данные из VIEW или JOIN таблиц.
+    """
+    conn = get_db_connection()
+    if not conn: return jsonify([])
+    
+    try:
+        cursor = conn.cursor()
+        # Выбираем последние 20 пациентов
+        query = """
+            SELECT TOP 20 
+                S.SubjectID, 
+                S.CodeName, 
+                T.ThreatName, 
+                S.StatusColor, 
+                S.HeartRate, 
+                S.SPO2, 
+                S.ArrivalTimestamp
+            FROM Subjects S
+            JOIN BioThreats T ON S.AssignedThreatID = T.ThreatID
+            ORDER BY S.ArrivalTimestamp DESC
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        
+        subjects = []
+        for row in rows:
+            subjects.append({
+                'id': row.SubjectID,
+                'name': row.CodeName,
+                'diagnosis': row.ThreatName,
+                'status_color': row.StatusColor, # Вычисляется в SQL
+                'hr': row.HeartRate,
+                'spo2': row.SPO2,
+                'arrival': row.ArrivalTimestamp.strftime('%H:%M:%S')
+            })
+        return jsonify(subjects)
+    except Exception as e:
+        print(f"API Error: {e}")
+        return jsonify([])
+    finally:
+        conn.close()
+
+@app.route('/api/data')
+@login_required
+def get_all_data():
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({
+            'patients': [],
+            'doctors': [],
+            'rooms': [],
+            'threats': []
+        })
+
+    try:
+        cursor = conn.cursor()
+
+        # Fetch Subjects
+        query_subjects = """
+            SELECT TOP 20
+                S.SubjectID,
+                S.CodeName,
+                T.ThreatName,
+                S.StatusColor,
+                S.HeartRate,
+                S.SPO2,
+                D.DocName,
+                R.RoomName,
+                S.ArrivalTimestamp,
+                T.ThreatID,
+                D.DoctorID,
+                R.RoomID
+            FROM Subjects S
+            JOIN BioThreats T ON S.AssignedThreatID = T.ThreatID
+            LEFT JOIN Doctors D ON S.AssignedDoctorID = D.DoctorID
+            LEFT JOIN Rooms R ON S.AssignedRoomID = R.RoomID
+            ORDER BY S.ArrivalTimestamp DESC
+        """
+        cursor.execute(query_subjects)
+        rows_subjects = cursor.fetchall()
+
+        patients = []
+        for row in rows_subjects:
+            patients.append([
+                row.SubjectID,
+                row.CodeName,
+                row.ThreatName,
+                row.StatusColor,
+                row.HeartRate,
+                row.SPO2,
+                row.DocName,
+                row.RoomName,
+                row.ArrivalTimestamp.isoformat(), # Use isoformat for JS compatibility
+                row.ThreatID,
+                row.DoctorID,
+                row.RoomID
+            ])
+
+        # Fetch Doctors
+        query_doctors = "SELECT DoctorID, DocName FROM Doctors ORDER BY DocName"
+        cursor.execute(query_doctors)
+        rows_doctors = cursor.fetchall()
+        doctors = [{'id': row.DoctorID, 'name': row.DocName} for row in rows_doctors]
+
+        # Fetch Rooms
+        query_rooms = "SELECT RoomID, RoomName FROM Rooms ORDER BY RoomName"
+        cursor.execute(query_rooms)
+        rows_rooms = cursor.fetchall()
+        rooms = [{'id': row.RoomID, 'name': row.RoomName} for row in rows_rooms]
+
+        # Fetch Threats
+        query_threats = "SELECT ThreatID, ThreatName FROM BioThreats ORDER BY ThreatID"
+        cursor.execute(query_threats)
+        rows_threats = cursor.fetchall()
+        threats = [{'id': row.ThreatID, 'name': row.ThreatName} for row in rows_threats]
+
+        return jsonify({
+            'patients': patients,
+            'doctors': doctors,
+            'rooms': rooms,
+            'threats': threats
+        })
+
+    finally:
+        conn.close()
+
+@app.route('/api/add_patient', methods=['POST'])
+@login_required
+def add_patient():
+    data = request.json
+    conn = get_db_connection()
+    if not conn: return jsonify({'success': False, 'message': 'Database Offline'}), 500
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO Subjects (CodeName, AssignedThreatID, HeartRate, SPO2, AssignedDoctorID, AssignedRoomID, ArrivalTimestamp)
+            VALUES (?, ?, ?, ?, ?, ?, GETDATE())
+        """, (
+            data['name'],
+            data['threat_id'],
+            data['hr'],
+            data['spo2'],
+            data['doctor_id'] if data['doctor_id'] else None, # Allow NULL if not selected
+            data['room_id'] if data['room_id'] else None      # Allow NULL if not selected
+        ))
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error adding patient: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
+
+@app.route('/api/update_patient', methods=['POST'])
+@login_required
+def update_patient():
+    data = request.json
+    conn = get_db_connection()
+    if not conn: return jsonify({'success': False, 'message': 'Database Offline'}), 500
+    try:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE Subjects
+            SET CodeName = ?, AssignedThreatID = ?, HeartRate = ?, SPO2 = ?, AssignedDoctorID = ?, AssignedRoomID = ?
+            WHERE SubjectID = ?
+        """, (
+            data['name'],
+            data['threat_id'],
+            data['hr'],
+            data['spo2'],
+            data['doctor_id'] if data['doctor_id'] else None,
+            data['room_id'] if data['room_id'] else None,
+            data['subject_id']
+        ))
+        conn.commit()
+        return jsonify({'success': True})
+    finally:
+        conn.close()
+
+@app.route('/api/delete_patient', methods=['POST'])
+@login_required
+def delete_patient():
+    data = request.json
+    conn = get_db_connection()
+    if not conn: return jsonify({'success': False, 'message': 'Database Offline'}), 500
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM Subjects WHERE SubjectID = ?", (data['subject_id'],))
+        conn.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        print(f"Error deleting patient: {e}")
+        return jsonify({'success': False, 'message': str(e)}), 500
+    finally:
+        conn.close()
 
 @app.route('/api/toggle_sim', methods=['POST'])
 @login_required
-@role_required(['Manager'])
 def toggle_sim():
     global SIMULATION_ACTIVE
     SIMULATION_ACTIVE = not SIMULATION_ACTIVE
     return jsonify({'status': SIMULATION_ACTIVE})
 
-@app.route('/api/data')
+@app.route('/api/resolve_subject', methods=['POST'])
 @login_required
-def get_data():
+def resolve_subject():
+    data = request.json
     conn = get_db_connection()
-    if not conn: return jsonify({'error': 'DB Connection Lost'}), 500
-    
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT TOP 50 
-            S.SubjectID, S.CodeName, T.ThreatName, S.StatusColor, S.HeartRate, S.SPO2, 
-            D.DocName, R.RoomName, S.ArrivalTimestamp,
-            S.AssignedThreatID, S.AssignedDoctorID, S.AssignedRoomID
-        FROM Subjects S
-        JOIN BioThreats T ON S.AssignedThreatID = T.ThreatID
-        LEFT JOIN Doctors D ON S.AssignedDoctorID = D.DoctorID
-        LEFT JOIN Rooms R ON S.AssignedRoomID = R.RoomID
-        ORDER BY S.ArrivalTimestamp DESC
-    """)
-    rows = cursor.fetchall()
-    patients = [list(row) for row in rows] 
-    
-    cursor.execute("SELECT DoctorID, DocName FROM Doctors")
-    doctors = [{'id': r[0], 'name': r[1]} for r in cursor.fetchall()]
-    
-    cursor.execute("SELECT RoomID, RoomName FROM Rooms")
-    rooms = [{'id': r[0], 'name': r[1]} for r in cursor.fetchall()]
-    
-    cursor.execute("SELECT ThreatID, ThreatName FROM BioThreats")
-    threats = [{'id': r[0], 'name': r[1]} for r in cursor.fetchall()]
-
-    conn.close()
-    return jsonify({
-        'patients': patients, 
-        'doctors': doctors,
-        'rooms': rooms,
-        'threats': threats,
-        'sim_status': SIMULATION_ACTIVE,
-        'user_role': session['role']
-    })
-
-@app.route('/api/add_patient', methods=['POST'])
-@login_required
-@role_required(['Registrar', 'Manager'])
-def add_patient():
-    data = request.json
+    if not conn: return jsonify({'success': False}), 500
     try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        
-        cursor.execute("""
-            INSERT INTO Subjects (CodeName, AssignedDoctorID, AssignedThreatID, AssignedRoomID, HeartRate, SPO2)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            data.get('name', 'Unknown Subject'), 
-            data.get('doctor_id'), 
-            data.get('threat_id'),
-            data.get('room_id'),
-            data.get('hr', 80),
-            data.get('spo2', 98)
-        ))
-        conn.commit()
-        conn.close()
-        return jsonify({'success': True})
-    except Exception as e:
-        print(f"Add Patient Error: {e}")
-        return jsonify({'success': False}), 500
-
-@app.route('/api/update_patient', methods=['POST'])
-@login_required
-@role_required(['Admin', 'Manager'])
-def update_patient():
-    data = request.json
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE Subjects
-            SET CodeName = ?, AssignedDoctorID = ?, AssignedThreatID = ?, AssignedRoomID = ?, HeartRate = ?, SPO2 = ?
-            WHERE SubjectID = ?
-        """, (data['name'], data['doctor_id'], data['threat_id'], data['room_id'], data['hr'], data['spo2'], data['subject_id']))
-        conn.commit()
-        conn.close()
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'success': False}), 500
-
-@app.route('/api/delete_patient', methods=['POST'])
-@login_required
-@role_required(['Admin', 'Manager'])
-def delete_patient():
-    data = request.json
-    try:
-        conn = get_db_connection()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM Subjects WHERE SubjectID = ?", (data['subject_id'],))
         conn.commit()
         conn.close()
         return jsonify({'success': True})
-    except Exception as e:
+    except Exception:
         return jsonify({'success': False}), 500
 
 @app.route('/api/export')
@@ -326,11 +471,15 @@ def export_data():
         cw.writerow(['ID', 'Patient Name', 'Diagnosis', 'Threat Level', 'HR', 'SPO2', 'Doctor', 'Location', 'Time'])
         for row in rows: cw.writerow(row)
         output = make_response(si.getvalue())
-        output.headers["Content-Disposition"] = "attachment; filename=bio_logs.csv"
+        output.headers["Content-Disposition"] = "attachment; filename=export_logs.csv"
         output.headers["Content-type"] = "text/csv"
         return output
+    except Exception as e:
+        return f"Export failed: {e}", 500
     finally:
         conn.close()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    print(">>> SYSTEM STARTUP INITIATED <<<")
+    # Исправлено: host удален, чтобы запускалось только на localhost (127.0.0.1)
+    app.run(debug=True, use_reloader=False, port=5000)

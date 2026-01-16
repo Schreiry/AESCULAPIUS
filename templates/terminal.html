@@ -22,7 +22,7 @@
                     <div class="header-box">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                             <div style="flex-grow: 1;">
-                                <h1 style="font-size: 2.5rem;">AESCULAPIUS <span class="blink">_ V1.4.6 SECURE</span></h1>
+                                <h1 style="font-size: 2.5rem;">AESCULAPIUS <span class="blink">_ V1.4.7 SECURE</span></h1>
                                 <div class="user-badge">
                                     <div class="sub-header">USER: {{ user_name }} // ROLE: {{ user_role|upper }} // TERMINAL: 04-B</div>
                                 </div>
@@ -45,7 +45,7 @@
                             <div class="hierarchy-container">
                                 <div style="margin-bottom:5px; font-size:0.8rem; border-bottom:1px solid var(--color-red);">CLEARANCE LEVEL</div>
                                 <div class="h-node {% if user_role == 'Manager' %}active-node{% endif %}">
-                                    HEAD PHYSICIAN <br><span style="font-size:12px">[Full System Access]</span>
+                                    OBSERVER <br><span style="font-size:12px">[Full System Access]</span>
                                 </div>
                                 <div class="h-line">|</div>
                                 <div class="h-node {% if user_role == 'Admin' %}active-node{% endif %}">
@@ -53,7 +53,7 @@
                                 </div>
                                 <div class="h-line">|</div>
                                 <div class="h-node {% if user_role == 'Registrar' %}active-node{% endif %}">
-                                    INTERN <br><span style="font-size:12px">[Patient Admit Only]</span>
+                                    REGISTRAR <br><span style="font-size:12px">[Patient Admit Only]</span>
                                 </div>
                             </div>
                         </div>
@@ -171,19 +171,19 @@
             patients.forEach(p => {
                 // p indexes: 0:ID, 1:Name, 2:ThreatName, 3:Color, 4:HR, 5:SPO2, 6:DocName, 7:RoomName, 8:Timestamp, 9: ThreatID, 10: DocID, 11: RoomID
                 const row = document.createElement('tr');
+                const safeData = encodeURIComponent(JSON.stringify(p)); // Define safeData here
                 
                 const color = p[3] || 'Green';
                 row.className = 'row-' + color.toLowerCase();
 
                 let actionsHtml = '';
                 if (['Admin', 'Manager'].includes(USER_ROLE)) {
-                    const safeData = encodeURIComponent(JSON.stringify(p));
                     actionsHtml = `
                         <td>
-                            <button class="mini-btn edit-btn" onclick="openModal('edit', '${safeData}')">EDIT</button>
-                            <button class="mini-btn delete-btn" onclick="deletePatient(${p[0]})">X</button>
+                            <button class="mini-btn delete-btn" onclick="deletePatient(${p[0]}, event)">X</button>
                         </td>
                     `;
+                    row.setAttribute('onclick', `openModal('edit', '${safeData}')`); // Make row clickable for edit
                 }
 
                 row.innerHTML = `
@@ -306,7 +306,8 @@
         }
 
         // --- DELETE FUNCTION ---
-        async function deletePatient(id) {
+        async function deletePatient(id, event) {
+            event.stopPropagation(); // Prevent row click from triggering
             if(!confirm("CONFIRM DELETION of Subject " + id + "? This action is irreversible.")) return;
             
             const res = await fetch('/api/delete_patient', {

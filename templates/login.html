@@ -53,7 +53,7 @@
                     <div class="error-msg">ERROR: {{ error }}</div>
                     {% endif %}
 
-                    <form method="POST">
+                    <form method="POST" action="/login_action">
                         <input type="text" name="username" class="login-input" placeholder="USERNAME" required autofocus autocomplete="off">
                         <input type="password" name="password" class="login-input" placeholder="PASSWORD" required>
                         <button type="submit" class="login-btn">LOGIN</button>
