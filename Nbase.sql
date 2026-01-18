@@ -16,21 +16,28 @@ USE AESCULAPIUS;
 GO
 
 -- 2. ТАБЛИЦА ПОЛЬЗОВАТЕЛЕЙ (ПЕРСОНАЛ)
+-- ПРИМЕЧАНИЕ: Структура обновлена сразу (PasswordHash NVARCHAR(500)) согласно требованиям.
 CREATE TABLE Users (
     UserID INT PRIMARY KEY IDENTITY(1,1),
     Username NVARCHAR(50) UNIQUE NOT NULL,
-    PasswordHash NVARCHAR(255) NOT NULL,
+    PasswordHash NVARCHAR(500) NOT NULL, -- Увеличено для хранения длинных PBKDF2 хешей
     Role NVARCHAR(20) NOT NULL CHECK (Role IN ('Registrar', 'Admin', 'Manager')),
     DisplayName NVARCHAR(100)
 );
 
--- персонал - их логины и пароли. 
+-- ПЕРСОНАЛ - ВСТАВКА ОБНОВЛЕННЫХ ДАННЫХ (ХЕШИ)
 INSERT INTO Users (Username, PasswordHash, Role, DisplayName) VALUES 
-('ChiefArchi', '24\Quis-Сustodiet-ips@s_cust@des|19', 'Manager', 'The Architect'),
-('admin_wolf', '\\\HeAl_or-Does_iT-HuRt?@@\\\ ', 'Admin', 'Dr. Wolf'),
-('admin_house', 'vicodin', 'Admin', 'Dr. House'),
-('admin_strange', 'dormammu', 'Admin', 'Dr. Strange'),
-('nurse_joy', '@\441Eto-Chto_Za-POKEMON|222|@', 'Registrar', 'Nurse Joy'),
+-- Обновленный хеш для ChiefArchi
+('ChiefArchi', 'pbkdf2:sha256:1000000$rV7LEC2c$78befa1fe17c7568bd93780a25684f7932478a8364c32e6b1fb234b3a132795c', 'Manager', 'The Architect'),
+-- Обновленный хеш для admin_wolf
+('admin_wolf', 'pbkdf2:sha256:1000000$OAJWZ1Ec$7340df782c4f7059d06ae1f84b72d6b9ed52475a8a38716577920addc821280c', 'Admin', 'Dr. Wolf'),
+-- Обновленный хеш для admin_house
+('admin_house', 'pbkdf2:sha256:1000000$pGEDDK0l$4096ace494fe003e157f9f40a4b29f26c6aeb14c108fcd33ec2ec3c7f7d7ef9c', 'Admin', 'Dr. House'),
+-- Обновленный хеш для admin_strange
+('admin_strange', 'pbkdf2:sha256:1000000$SrioZDEQ$b60d18103a26d52319da9db508a63840caa392cdd2ea907096b41ef33d7d214c', 'Admin', 'Dr. Strange'),
+-- Обновленный хеш для nurse_joy
+('nurse_joy', 'pbkdf2:sha256:1000000$KZA67Ok9$d4e0ec769d5fa23cb5a5ec1f691e17083d14e9475264b01d8856dd59b79a2419', 'Registrar', 'Nurse Joy'),
+-- ВНИМАНИЕ: Для следующих пользователей хеши не были предоставлены в логе. Оставлены старые значения.
 ('nurse_ratched', 'cuckoo', 'Registrar', 'Nurse Ratched'),
 ('clerk_kent', 'superman', 'Registrar', 'Clark Kent');
 
@@ -151,9 +158,10 @@ INSERT INTO BioThreats (ThreatID, ThreatName, ThreatLevel, LethalityRate) VALUES
 (50, 'Void Exposure', 4, 1.0);
 
 -- 6. ТАБЛИЦА ПАЦИЕНТОВ (СУБЪЕКТОВ)
+-- ПРИМЕЧАНИЕ: CodeName NVARCHAR(1000) согласно требованиям.
 CREATE TABLE Subjects (
     SubjectID INT PRIMARY KEY IDENTITY(1,1),
-    CodeName NVARCHAR(100),
+    CodeName NVARCHAR(1000), -- Увеличено до 1000
     
     -- Связь с таблицей угроз
     AssignedThreatID INT FOREIGN KEY REFERENCES BioThreats(ThreatID),
@@ -184,5 +192,5 @@ VALUES ('TEST-SUBJECT-ZERO', 41, 0, 0);
 
 GO
 
--- ФИНАЛЬНАЯ ПРОВЕРКА: Вывод количества загрженных угроз
+-- ФИНАЛЬНАЯ ПРОВЕРКА: Вывод количества загруженных угроз
 SELECT 'Database Created Successfully' as Status, COUNT(*) as Total_Threats_Loaded FROM BioThreats;

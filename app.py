@@ -8,8 +8,12 @@ import datetime
 from functools import wraps
 from flask import Flask, render_template, jsonify, request, make_response, session, redirect, url_for
 
+# --- Локальные импорты для безопасности ---
+from config import SECRET_KEY
+from security_utils import verify_password, encrypt_data, decrypt_data
+
 app = Flask(__name__)
-app.secret_key = 'OMEGA_PROTOCOL_SECRET_KEY_XY99' 
+app.secret_key = SECRET_KEY 
 
 # --- КОНФИГУРАЦИЯ СЕРВЕРА ---
 # Убедись, что имя сервера верное
@@ -174,6 +178,7 @@ def chaos_engine():
                     fname = random.choice(FIRST_NAMES)
                     lname = random.choice(LAST_NAMES)
                     full_name = f"{fname} {lname}"
+                    encrypted_name = encrypt_data(full_name) # Шифруем имя перед вставкой
                     
                     threat_name = FULL_THREAT_DICT.get(threat_id, "Unknown Threat")
                     print(f"[CHAOS] Spawning: {full_name} | ID: {threat_id} ({threat_name}) | Roll: {roll:.2f}")
@@ -185,7 +190,7 @@ def chaos_engine():
                     cursor.execute("""
                         INSERT INTO Subjects (CodeName, AssignedThreatID, HeartRate, SPO2, AssignedDoctorID, AssignedRoomID, ArrivalTimestamp)
                         VALUES (?, ?, ?, ?, ?, ?, GETDATE())
-                    """, (full_name, threat_id, heart_rate, spo2, assigned_doctor_id, assigned_room_id))
+                    """, (encrypted_name, threat_id, heart_rate, spo2, assigned_doctor_id, assigned_room_id))
                     conn.commit()
                 except Exception as e:
                     print(f"[CHAOS ERROR] {e}")
@@ -216,17 +221,19 @@ def login_action():
     
     try:
         cursor = conn.cursor()
-        # Проверяем пользователя в БД
-        cursor.execute("SELECT UserID, Role, DisplayName FROM Users WHERE Username=? AND PasswordHash=?", (username, password))
-        user = cursor.fetchone()
+        # Шаг 1: Найти пользователя по логину
+        cursor.execute("SELECT UserID, Role, DisplayName, PasswordHash FROM Users WHERE Username=?", (username,))
+        user_record = cursor.fetchone()
         
-        if user:
-            session['user_id'] = user[0]
-            session['role'] = user[1]
-            session['name'] = user[2]
+        # Шаг 2: Проверить хеш пароля, если пользователь найден
+        if user_record and verify_password(user_record.PasswordHash, password):
+            session['user_id'] = user_record.UserID
+            session['role'] = user_record.Role
+            session['name'] = user_record.DisplayName
             # При успехе перенаправляем на монитор
             return redirect(url_for('monitor'))
         else:
+            # Пользователь не найден или пароль неверный
             return render_template('login.html', error="INVALID CREDENTIALS")
     finally:
         conn.close()
@@ -270,7 +277,7 @@ def get_subjects():
         for row in rows:
             subjects.append({
                 'id': row.SubjectID,
-                'name': row.CodeName,
+                'name': decrypt_data(row.CodeName), # Расшифровываем имя для отображения
                 'diagnosis': row.ThreatName,
                 'status_color': row.StatusColor, # Вычисляется в SQL
                 'hr': row.HeartRate,
@@ -327,7 +334,7 @@ def get_all_data():
         for row in rows_subjects:
             patients.append([
                 row.SubjectID,
-                row.CodeName,
+                decrypt_data(row.CodeName), # Расшифровываем имя
                 row.ThreatName,
                 row.StatusColor,
                 row.HeartRate,
@@ -380,7 +387,7 @@ def add_patient():
             INSERT INTO Subjects (CodeName, AssignedThreatID, HeartRate, SPO2, AssignedDoctorID, AssignedRoomID, ArrivalTimestamp)
             VALUES (?, ?, ?, ?, ?, ?, GETDATE())
         """, (
-            data['name'],
+            encrypt_data(data['name']), # Шифруем имя
             data['threat_id'],
             data['hr'],
             data['spo2'],
@@ -408,7 +415,7 @@ def update_patient():
             SET CodeName = ?, AssignedThreatID = ?, HeartRate = ?, SPO2 = ?, AssignedDoctorID = ?, AssignedRoomID = ?
             WHERE SubjectID = ?
         """, (
-            data['name'],
+            encrypt_data(data['name']), # Шифруем имя
             data['threat_id'],
             data['hr'],
             data['spo2'],
@@ -479,7 +486,11 @@ def export_data():
         si = io.StringIO()
         cw = csv.writer(si)
         cw.writerow(['ID', 'Patient Name', 'Diagnosis', 'Threat Level', 'HR', 'SPO2', 'Doctor', 'Location', 'Time'])
-        for row in rows: cw.writerow(row)
+        for row in rows:
+            # Создаем изменяемую копию кортежа, расшифровываем имя и записываем
+            row_list = list(row)
+            row_list[1] = decrypt_data(row_list[1]) # row_list[1] это CodeName
+            cw.writerow(row_list)
         output = make_response(si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename=export_logs.csv"
         output.headers["Content-type"] = "text/csv"
