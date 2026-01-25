@@ -11,7 +11,7 @@
 ║  █▀█ ██▄ ▄█ █▄▄ █▄█ █▄▄ █▀█ █▀▀ █ █▄█ ▄█                      ║
 ║                                                               ║
 ║              [OMEGA PROTOCOL INITIALIZED]                     ║
-║           > TRIAGE SYSTEM v1.4.2 :: ACTIVE <                    ║
+║           > TRIAGE SYSTEM v1.4.9 :: ACTIVE <                  ║
 ╚═══════════════════════════════════════════════════════════════╝
 ```
 
@@ -345,4 +345,5 @@ This project is a fictional simulation for educational and artistic purposes. It
 Built with obsession by someone who watched too much cyberpunk and played too many survival horror games.
 
 </div>
+
 
