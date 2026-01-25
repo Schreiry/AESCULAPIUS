@@ -1,0 +1,387 @@
+/* --- LOGIN PAGE SPECIFIC STYLES --- */
+
+.login-container {
+    width: 90%;
+    max-width: 1000px;
+    height: 90vh;
+    margin: auto;
+    border: 3px solid var(--phosphor-primary);
+    padding: 60px 80px;
+    background: rgba(0, 20, 0, 0.95);
+    box-shadow: 0 0 40px var(--phosphor-dim), inset 0 0 30px rgba(51, 255, 51, 0.05);
+    text-align: center;
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.login-form-wrapper {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 30px;
+}
+
+.login-form-wrapper h1 {
+    font-size: 5rem !important;
+    margin: 0 0 20px 0 !important;
+    letter-spacing: 4px;
+    text-shadow: 0 0 20px var(--phosphor-primary);
+}
+
+.login-form-wrapper .blink-text {
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+}
+
+.login-form-wrapper form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* --- PROTOCOL MONITOR (LEFT BORDER ONLY) --- */
+.protocol-monitor {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: calc(100% - 40px);
+    max-width: 220px;
+    border-left: 2px solid var(--phosphor-primary);
+    border-right: none;
+    border-top: none;
+    border-bottom: none;
+    padding: 15px 20px;
+    background: rgba(0, 20, 0, 0.9);
+    box-shadow: 0 0 20px var(--phosphor-dim), inset 0 0 15px rgba(51, 255, 51, 0.03);
+    clip-path: inset(0 10px 0 0); /* обрезает справа */
+    font-size: 0.9rem;
+    color: var(--phosphor-dim);
+    text-align: left;
+    font-family: 'VT323', monospace;
+    max-height: 140px;
+    overflow-y: auto;
+    line-height: 1.6;
+    letter-spacing: 0.5px;
+    z-index: 99;
+}
+
+.protocol-line {
+    margin-bottom: 3px;
+}
+
+.protocol-ok {
+    color: var(--phosphor-primary);
+}
+
+.protocol-wait {
+    color: var(--phosphor-warn);
+    animation: blink 1.5s infinite;
+}
+
+.login-input {
+    background: #000;
+    color: var(--phosphor-primary);
+    border: 2px solid var(--phosphor-dim);
+    width: 100%;
+    height: 75px;
+    padding: 20px 15px;
+    font-family: 'VT323';
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+input[type="password"].login-input {
+    background: #000;
+    color: var(--phosphor-primary);
+    border: 2px solid var(--phosphor-dim);
+    width: 100%;
+    padding: 20px 15px;
+    font-family: 'VT323';
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    letter-spacing: 1px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-text-fill-color: var(--phosphor-primary) !important;
+    caret-color: var(--phosphor-primary);
+}
+
+.login-input:focus {
+    outline: none;
+    border-color: var(--phosphor-primary);
+    box-shadow: 0 0 20px var(--phosphor-primary), inset 0 0 10px rgba(51, 255, 51, 0.1);
+    background: #001100;
+}
+
+.login-input::placeholder {
+    color: var(--phosphor-dim);
+    opacity: 0.7;
+}
+
+/* --- AUTOFILL STYLING (BROWSER PASSWORD/USERNAME AUTOFILL) --- */
+.login-input:-webkit-autofill,
+.login-input:-webkit-autofill:hover,
+.login-input:-webkit-autofill:focus,
+.login-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #000 inset !important;
+    box-shadow: 0 0 0 30px #000 inset !important;
+    -webkit-text-fill-color: var(--phosphor-primary) !important;
+    border-color: var(--phosphor-dim) !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+}
+
+input[type="password"].login-input:-webkit-autofill,
+input[type="password"].login-input:-webkit-autofill:hover,
+input[type="password"].login-input:-webkit-autofill:focus,
+input[type="password"].login-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #000 inset !important;
+    box-shadow: 0 0 0 30px #000 inset !important;
+    -webkit-text-fill-color: var(--phosphor-primary) !important;
+    border-color: var(--phosphor-dim) !important;
+}
+
+.login-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 20px var(--phosphor-primary), 0 0 0 30px #000 inset !important;
+    -webkit-text-fill-color: var(--phosphor-primary) !important;
+}
+
+.login-btn {
+    font-size: 2rem;
+    padding: 15px 50px;
+    width: 100%;
+    margin-top: 20px;
+    border: 2px solid var(--phosphor-primary);
+    background: #000;
+    color: var(--phosphor-primary);
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="10" cy="10" r="3" fill="%23ffff33" opacity="1"/><line x1="10" y1="0" x2="10" y2="6" stroke="%23ffff33" stroke-width="1.5" opacity="0.9"/><line x1="10" y1="14" x2="10" y2="32" stroke="%23ffff33" stroke-width="1.5" opacity="0.9"/><line x1="0" y1="10" x2="6" y2="10" stroke="%23ffff33" stroke-width="1.5" opacity="0.9"/><line x1="14" y1="10" x2="32" y2="10" stroke="%23ffff33" stroke-width="1.5" opacity="0.9"/><circle cx="10" cy="10" r="4.5" fill="none" stroke="%23ffff33" stroke-width="1.5" opacity="0.8"/></svg>') 10 10, auto;
+    transition: all 0.2s ease;
+}
+
+.login-btn:hover {
+    background: var(--phosphor-primary);
+    color: #000;
+    box-shadow: 0 0 25px var(--phosphor-primary);
+    transform: scale(1.02);
+}
+
+.blink-text {
+    animation: blink 1s infinite;
+}
+
+.error-msg {
+    color: var(--phosphor-alert);
+    margin-bottom: 20px;
+    border: 2px solid var(--phosphor-alert);
+    padding: 15px;
+    font-size: 1.3rem;
+    background: rgba(255, 0, 0, 0.1);
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* --- INFO BUTTON STYLES --- */
+.info-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 150;
+    width: 50px;
+    height: 50px;
+    background: #000;
+    border: 1px solid var(--phosphor-dim);
+    color: var(--phosphor-dim);
+    font-size: 1.6rem;
+    font-family: 'VT323', monospace;
+    font-weight: bold;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="10" cy="10" r="3" fill="%23ffff33" opacity="1"/><line x1="10" y1="0" x2="10" y2="6" stroke="%23ffff33" stroke-width="1.5" opacity="0.9"/><line x1="10" y1="14" x2="10" y2="32" stroke="%23ffff33" stroke-width="1.5" opacity="0.9"/><line x1="0" y1="10" x2="6" y2="10" stroke="%23ffff33" stroke-width="1.5" opacity="0.9"/><line x1="14" y1="10" x2="32" y2="10" stroke="%23ffff33" stroke-width="1.5" opacity="0.9"/><circle cx="10" cy="10" r="4.5" fill="none" stroke="%23ffff33" stroke-width="1.5" opacity="0.8"/></svg>') 10 10, auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    transition: all 0.2s ease;
+    text-shadow: none;
+}
+
+.info-button:hover {
+    border-color: var(--phosphor-primary);
+    color: var(--phosphor-primary);
+    box-shadow: 0 0 15px var(--phosphor-primary);
+    background: #000;
+    animation: soft-flicker 1.2s ease-in-out infinite;
+}
+
+@keyframes soft-flicker {
+    0%, 100% { opacity: 1; box-shadow: 0 0 10px var(--phosphor-primary); }
+    50% { opacity: 0.7; box-shadow: 0 0 20px var(--phosphor-primary); }
+}
+
+/* --- ROLES MODAL --- */
+.roles-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 20, 0, 0.8);
+    backdrop-filter: blur(2px);
+    z-index: 200;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    animation: crt-fadeIn 0.3s ease-out;
+}
+
+.roles-modal-overlay.active {
+    display: flex;
+}
+
+@keyframes crt-fadeIn {
+    from {
+        opacity: 0;
+        filter: brightness(0.5);
+    }
+    to {
+        opacity: 1;
+        filter: brightness(1);
+    }
+}
+
+@keyframes crt-fadeOut {
+    from {
+        opacity: 1;
+        filter: brightness(1);
+    }
+    to {
+        opacity: 0;
+        filter: brightness(0.5);
+    }
+}
+
+.roles-modal-overlay.closing {
+    animation: crt-fadeOut 0.4s ease-out forwards;
+}
+
+.roles-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 600px;
+    width: 90%;
+    animation: roles-slideIn 0.4s ease-out;
+}
+
+@keyframes roles-slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.roles-container.closing {
+    animation: roles-slideOut 0.3s ease-out forwards;
+}
+
+@keyframes roles-slideOut {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+}
+
+.role-card {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--phosphor-dim);
+    padding: 20px;
+    color: var(--phosphor-primary);
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    line-height: 1.6;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.role-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 51, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.role-card:hover::before {
+    left: 100%;
+}
+
+.role-card:hover {
+    border-color: var(--phosphor-warn);
+    color: var(--phosphor-warn);
+    box-shadow: 0 0 12px var(--phosphor-warn), inset 0 0 12px rgba(255, 255, 51, 0.05);
+    text-shadow: 0 0 5px var(--phosphor-warn);
+    transform: translateY(-3px);
+}
+
+.role-card h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 8px;
+}
+
+.role-permissions {
+    font-size: 0.95rem;
+    opacity: 0.9;
+    line-height: 1.8;
+}
+
+.role-permissions li {
+    margin-bottom: 5px;
+}
+
+.permission-highlight {
+    color: var(--phosphor-warn);
+    font-weight: bold;
+}
+
+/* --- TEXT SELECTION STYLING (FALLOUT/CRT THEME) --- */
+::selection {
+    background: var(--phosphor-primary);
+    color: #000;
+    text-shadow: 0 0 15px var(--phosphor-warn), 0 0 8px var(--phosphor-primary);
+}
+
+::-moz-selection {
+    background: var(--phosphor-primary);
+    color: #000;
+    text-shadow: 0 0 15px var(--phosphor-warn), 0 0 8px var(--phosphor-primary);
+}

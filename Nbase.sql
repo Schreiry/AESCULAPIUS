@@ -37,7 +37,7 @@ INSERT INTO Users (Username, PasswordHash, Role, DisplayName) VALUES
 ('admin_strange', 'pbkdf2:sha256:1000000$SrioZDEQ$b60d18103a26d52319da9db508a63840caa392cdd2ea907096b41ef33d7d214c', 'Admin', 'Dr. Strange'),
 -- Обновленный хеш для nurse_joy
 ('nurse_joy', 'pbkdf2:sha256:1000000$KZA67Ok9$d4e0ec769d5fa23cb5a5ec1f691e17083d14e9475264b01d8856dd59b79a2419', 'Registrar', 'Nurse Joy'),
--- ВНИМАНИЕ: Для следующих пользователей хеши не были предоставлены в логе. Оставлены старые значения.
+-- Для следующих пользователей хешей нет.Оставлены старые значения.
 ('nurse_ratched', 'cuckoo', 'Registrar', 'Nurse Ratched'),
 ('clerk_kent', 'superman', 'Registrar', 'Clark Kent');
 

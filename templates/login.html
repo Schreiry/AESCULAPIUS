@@ -5,37 +5,9 @@
     <title>AESCULAPIUS: AUTH</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/retro_style.css">
+    <link rel="stylesheet" href="/static/login_style.css">
     <style>
-        .login-container {
-            width: 400px;
-            margin: auto;
-            border: 2px solid var(--phosphor-primary);
-            padding: 40px;
-            background: rgba(0, 20, 0, 0.9);
-            box-shadow: 0 0 20px var(--phosphor-dim);
-            text-align: center;
-            position: relative;
-            z-index: 10;
-        }
-        .login-input {
-            background: #000;
-            color: var(--phosphor-primary);
-            border: 1px solid var(--phosphor-dim);
-            width: 90%;
-            padding: 10px;
-            font-family: 'VT323';
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-        }
-        .login-btn {
-            /* Now handled by global button styles */
-        }
-        .login-btn:hover {
-            /* Now handled by global button:hover styles */
-        }
-        .blink-text { animation: blink 1s infinite; }
-        .error-msg { color: var(--color-red); margin-bottom: 15px; border: 1px solid var(--color-red); padding: 5px; }
+        /* All login styles moved to /static/login_style.css */
     </style>
 </head>
 <body>
@@ -44,27 +16,183 @@
             <div class="scanlines"></div>   
             <div class="crt-overlay"></div> 
             
+            <!-- INFO BUTTON -->
+            <button class="info-button" id="infoBtn" title="System Information">i</button>
+
+            <!-- ROLES INFORMATION MODAL -->
+            <div class="roles-modal-overlay" id="rolesModal">
+                <div class="roles-container" id="rolesContainer">
+                    <!-- ADMINISTRATOR -->
+                    <div class="role-card">
+                        <h3>▌ ADMINISTRATOR ▌</h3>
+                        <div class="role-permissions">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li>► FULL SYSTEM CONTROL</li>
+                                <li>► Manage ALL users and roles</li>
+                                <li>► Create / Delete patient records</li>
+                                <li>► <span class="permission-highlight">EDIT</span> all patient data</li>
+                                <li>► Access EVENT LOGS</li>
+                                <li>► View all DATABASES</li>
+                                <li>► Modify system CONFIGURATION</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- REGISTRAR -->
+                    <div class="role-card">
+                        <h3>▌ REGISTRAR ▌</h3>
+                        <div class="role-permissions">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li>► Create NEW patient records</li>
+                                <li>► View patient HISTORY</li>
+                                <li>► View ASSIGNED patients</li>
+                                <li>► <span class="permission-highlight">CANNOT EDIT</span> data</li>
+                                <li>► <span class="permission-highlight">CANNOT DELETE</span> records</li>
+                                <li>► Limited access to logs</li>
+                                <li>► <span class="permission-highlight">READ-ONLY</span> mode</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- MANAGER -->
+                    <div class="role-card">
+                        <h3>▌ MANAGER ▌</h3>
+                        <div class="role-permissions">
+                            <ul style="list-style: none; padding: 0; margin: 0;">
+                                <li>► View patient DATA</li>
+                                <li>► Analyze STATISTICS</li>
+                                <li>► View REPORTS and GRAPHS</li>
+                                <li>► <span class="permission-highlight">LIMITED EDIT</span> without DELETE</li>
+                                <li>► Access MONITORING dashboards</li>
+                                <li>► <span class="permission-highlight">CANNOT CREATE</span> new users</li>
+                                <li>► <span class="permission-highlight">CANNOT ADMIN</span> system</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="content-layer" style="display:flex; height:100%; align-items:center; justify-content:center;">
                 <div class="login-container">
-                    <h1 style="font-size: 3rem; margin-top: 0;">AESCULAPIUS</h1>
-                    <p class="blink-text">> AUTHENTICATION REQUIRED_</p>
-                    
-                    {% if error %}
-                    <div class="error-msg">ERROR: {{ error }}</div>
-                    {% endif %}
+                    <div class="login-form-wrapper">
+                        <h1 style="font-size: 3rem; margin-top: 0;">AESCULAPIUS</h1>
+                        <p class="blink-text">> AUTHENTICATION REQUIRED_</p>
+                        
+                        {% if error %}
+                        <div class="error-msg">ERROR: {{ error }}</div>
+                        {% endif %}
 
-                    <form method="POST" action="/login_action">
-                        <input type="text" name="username" class="login-input" placeholder="USERNAME" required autofocus autocomplete="off">
-                        <input type="password" name="password" class="login-input" placeholder="PASSWORD" required>
-                        <button type="submit" class="login-btn">LOGIN</button>
-                    </form>
+                        <form method="POST" action="/login_action" style="margin: 20px 0;">
+                            <input type="text" name="username" class="login-input" placeholder="USERNAME" required autofocus autocomplete="off">
+                            <input type="password" name="password" class="login-input" placeholder="PASSWORD" required>
+                            <button type="submit" class="login-btn">LOGIN</button>
+                        </form>
+                    </div>
                     
-                    <div style="margin-top: 20px; font-size: 0.8rem; color: #555;">
+                    <div style="margin-top: 20px; font-size: 1rem; color: #555; letter-spacing: 2px;">
                         OMEGA PROTOCOL // SECURE TERMINAL
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- PROTOCOL MONITOR (FIXED POSITION) -->
+    <div class="protocol-monitor" id="protocolMonitor">
+        <div class="protocol-line"><span class="protocol-ok">[✓] CORE MODULE INITIALIZED</span></div>
+        <div class="protocol-line"><span class="protocol-ok">[✓] DATABASE CONNECTION OK</span></div>
+        <div class="protocol-line"><span class="protocol-ok">[✓] SECURITY PROTOCOL LOADED</span></div>
+        <div class="protocol-line"><span class="protocol-ok">[✓] CIPHER ENGINE VERIFIED</span></div>
+        <div class="protocol-line"><span class="protocol-wait">[~] AUTHENTICATION AWAITING...</span></div>
+    </div>
+
+    <script>
+        const infoBtn = document.getElementById('infoBtn');
+        const rolesModal = document.getElementById('rolesModal');
+        const rolesContainer = document.getElementById('rolesContainer');
+
+        let isModalOpen = false;
+
+        infoBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            
+            if (!isModalOpen) {
+                // OPEN
+                rolesModal.classList.add('active');
+                isModalOpen = true;
+            } else {
+                // CLOSE
+                rolesModal.classList.add('closing');
+                rolesContainer.classList.add('closing');
+                
+                setTimeout(() => {
+                    rolesModal.classList.remove('active', 'closing');
+                    rolesContainer.classList.remove('closing');
+                    isModalOpen = false;
+                }, 400);
+            }
+        });
+
+        // CLOSE MODAL when clicking outside
+        rolesModal.addEventListener('click', function(e) {
+            if (e.target === rolesModal && isModalOpen) {
+                infoBtn.click();
+            }
+        });
+
+        // PREVENT closing when clicking on cards
+        document.querySelectorAll('.role-card').forEach(card => {
+            card.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        });
+
+        // === PROTOCOL MONITOR ANIMATION ===
+        const protocolMonitor = document.getElementById('protocolMonitor');
+        const protocolLines = [
+            { text: '[✓] CORE MODULE INITIALIZED', status: 'ok', delay: 0 },
+            { text: '[✓] DATABASE CONNECTION OK', status: 'ok', delay: 300 },
+            { text: '[✓] SECURITY PROTOCOL LOADED', status: 'ok', delay: 600 },
+            { text: '[✓] CIPHER ENGINE VERIFIED', status: 'ok', delay: 900 },
+            { text: '[~] AUTHENTICATION AWAITING...', status: 'wait', delay: 1200 }
+        ];
+
+        // Function to add lines with delay
+        function animateProtocol() {
+            protocolMonitor.innerHTML = '';
+            
+            protocolLines.forEach((line, index) => {
+                setTimeout(() => {
+                    const lineEl = document.createElement('div');
+                    lineEl.className = 'protocol-line';
+                    const statusClass = line.status === 'ok' ? 'protocol-ok' : 'protocol-wait';
+                    lineEl.innerHTML = `<span class="${statusClass}">${line.text}</span>`;
+                    
+                    lineEl.style.opacity = '0';
+                    lineEl.style.animation = 'fadeIn 0.4s ease forwards';
+                    
+                    protocolMonitor.appendChild(lineEl);
+                    
+                    // Auto-scroll to bottom
+                    protocolMonitor.scrollTop = protocolMonitor.scrollHeight;
+                }, line.delay);
+            });
+        }
+
+        // Start animation on page load
+        window.addEventListener('load', animateProtocol);
+        // Restart animation every 8 seconds (cycle)
+        setInterval(animateProtocol, 8000);
+
+        // Add fadeIn animation to global styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateX(-10px); }
+                to { opacity: 1; transform: translateX(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

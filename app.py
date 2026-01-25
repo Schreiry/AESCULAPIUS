@@ -244,6 +244,12 @@ def monitor():
     # Терминал доступен только после входа
     return render_template('terminal.html', user_name=session.get('name'), user_role=session.get('role'))
 
+@app.route('/logout', methods=['GET'])
+def logout():
+    # Очищаем сессию и перенаправляем на страницу входа
+    session.clear()
+    return redirect(url_for('login_page'))
+
 @app.route('/api/subjects')
 @login_required
 def get_subjects():
