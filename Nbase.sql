@@ -16,7 +16,8 @@ USE AESCULAPIUS;
 GO
 
 -- 2. ТАБЛИЦА ПОЛЬЗОВАТЕЛЕЙ (ПЕРСОНАЛ)
--- ПРИМЕЧАНИЕ: Структура обновлена сразу (PasswordHash NVARCHAR(500)) согласно требованиям.
+-- ПРИМЕЧАНИЕ: Структура обновлена -  (PasswordHash NVARCHAR(500)).
+-- теперь у нас хеши вместо паролей, которые прсото так лежат. теперь же особоой ценности у хешей - случайных солей для злоумышленика нет.
 CREATE TABLE Users (
     UserID INT PRIMARY KEY IDENTITY(1,1),
     Username NVARCHAR(50) UNIQUE NOT NULL,
@@ -25,7 +26,7 @@ CREATE TABLE Users (
     DisplayName NVARCHAR(100)
 );
 
--- ПЕРСОНАЛ - ВСТАВКА ОБНОВЛЕННЫХ ДАННЫХ (ХЕШИ)
+-- ПЕРСОНАЛ - (ХЕШИ)
 INSERT INTO Users (Username, PasswordHash, Role, DisplayName) VALUES 
 -- Обновленный хеш для ChiefArchi
 ('ChiefArchi', 'pbkdf2:sha256:1000000$rV7LEC2c$78befa1fe17c7568bd93780a25684f7932478a8364c32e6b1fb234b3a132795c', 'Manager', 'The Architect'),
