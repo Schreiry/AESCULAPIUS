@@ -21,11 +21,11 @@ html, body {
     color: var(--phosphor-primary);
     overflow: hidden; /* Запрещаем скролл самого окна, скролл будет внутри монитора */
     user-select: none; /* Текст нельзя выделять, как на реальном оборудовании */
-    /* --- CUSTOM CURSOR (FALLOUT STYLE) --- */
-    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><circle cx="10" cy="10" r="3" fill="%2333ff33" opacity="0.9"/><line x1="10" y1="0" x2="10" y2="6" stroke="%2333ff33" stroke-width="1.5" opacity="0.8"/><line x1="10" y1="14" x2="10" y2="32" stroke="%2333ff33" stroke-width="1.5" opacity="0.8"/><line x1="0" y1="10" x2="6" y2="10" stroke="%2333ff33" stroke-width="1.5" opacity="0.8"/><line x1="14" y1="10" x2="32" y2="10" stroke="%2333ff33" stroke-width="1.5" opacity="0.8"/><circle cx="10" cy="10" r="4.5" fill="none" stroke="%2333ff33" stroke-width="1" opacity="0.6"/></svg>') 10 10, auto;
+    /* --- CUSTOM CURSOR --- */
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><filter id="glow"><feGaussianBlur stdDeviation="1.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="10" cy="10" r="4" fill="%2333ff33" opacity="0.95" filter="url(%23glow)"/><line x1="10" y1="0" x2="10" y2="5" stroke="%2333ff33" stroke-width="2" opacity="0.9"/><line x1="10" y1="15" x2="10" y2="32" stroke="%2333ff33" stroke-width="2" opacity="0.9"/><line x1="0" y1="10" x2="5" y2="10" stroke="%2333ff33" stroke-width="2" opacity="0.9"/><line x1="15" y1="10" x2="32" y2="10" stroke="%2333ff33" stroke-width="2" opacity="0.9"/><circle cx="10" cy="10" r="5.5" fill="none" stroke="%2333ff33" stroke-width="1.5" opacity="0.7" filter="url(%23glow)"/></svg>') 10 10, auto;
 }
 
-/* --- TEXT SELECTION STYLING (FALLOUT/CRT THEME) --- */
+/* --- TEXT SELECTION STYLING --- */
 ::selection {
     background: var(--phosphor-primary);
     color: #000;
@@ -225,13 +225,17 @@ tr:hover td {
 
 .modal-window {
     background: #000;
-    border: 1px solid var(--phosphor-primary);
-    padding: 20px 30px;
-    width: 100%;
-    max-width: 650px;
-    box-shadow: 0 0 25px rgba(51, 255, 51, 0.15), inset 0 0 15px rgba(51, 255, 51, 0.1);
+    border: 2px solid var(--phosphor-primary);
+    padding: 35px 50px;
+    width: 70vh;
+    max-width: 920px;
+    height: auto;
+    max-height: 85vh;
+    box-shadow: 0 0 40px rgba(51, 255, 51, 0.22), inset 0 0 25px rgba(51, 255, 51, 0.12);
     position: relative;
     color: var(--phosphor-primary);
+    display: flex;
+    flex-direction: column;
 }
 
 .modal-window h2 {
@@ -245,33 +249,153 @@ tr:hover td {
 /* Redefined Form Grid for stability */
 .form-grid {
     display: grid;
-    grid-template-columns: 180px 1fr; /* Fixed label column, flexible input column */
-    gap: 18px;
+    grid-template-columns: 230px 1fr;
+    gap: 25px;
     align-items: center;
-    margin-top: 20px;
+    margin-top: 25px;
+    row-gap: 28px;
 }
 
 .form-grid label {
     text-align: right;
-    padding-right: 15px;
-    font-size: 1.3rem;
+    padding-right: 20px;
+    font-size: 1.35rem;
     color: var(--phosphor-dim);
     text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
 }
 
 /* Form inputs styling */
-input[type="text"], input[type="number"], select {
+input[type="text"], select {
     background: #080808;
     border: 1px solid var(--phosphor-dim);
     color: var(--phosphor-primary);
     width: 100%;
-    padding: 8px 12px;
+    padding: 10px 15px;
     font-family: 'VT323';
     font-size: 1.3rem;
     box-sizing: border-box;
     transition: all 0.2s;
-    /* Custom cursor for input fields */
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><line x1="8" y1="4" x2="8" y2="28" stroke="%2333ff33" stroke-width="2" opacity="0.9"/><circle cx="8" cy="16" r="5" fill="none" stroke="%2333ff33" stroke-width="1.2" opacity="0.7"/></svg>') 8 16, text;
+}
+
+/* --- SPINBOX (NUMBER INPUT) STYLING - REWORKED --- */
+.full-width {
+    display: flex !important;
+    gap: 20px !important;
+    grid-column: 1 / -1 !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.full-width > div { /* This is the .HRSPO2 container */
+    position: relative;
+    flex: 1;
+    display: flex;
+    flex-direction: row; /* Arrange label and input side-by-side */
+    align-items: center;
+    justify-content: flex-start; /* Align to the left */
+    gap: 10px;
+    padding-right: 50px; /* Make space for the 50px wide spinbox buttons */
+}
+
+.full-width > div > label {
+    text-align: right;
+    padding: 0;
+    margin: 0;
+    font-size: 1.6rem;
+    color: var(--phosphor-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+input[type="number"] {
+    background: #080808;
+    border: 2px solid var(--phosphor-dim);
+    color: var(--phosphor-primary);
+    width: 100px; /* Square input */
+    padding: 0;
+    font-family: 'VT323';
+    font-size: 2.6rem; /* Large font for big input */
+    box-sizing: border-box;
+    transition: all 0.2s;
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><line x1="8" y1="4" x2="8" y2="28" stroke="%2333ff33" stroke-width="2" opacity="0.9"/><circle cx="8" cy="16" r="5" fill="none" stroke="%2333ff33" stroke-width="1.2" opacity="0.7"/></svg>') 8 16, text;
+    -moz-appearance: textfield;
+    height: 100px; /* Square input 100x100 */
+    text-align: center;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Hide browser default spinners */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+    display: none;
+}
+
+/* Custom spinbox buttons - adjusted for new layout */
+.spinbox-btn {
+    position: absolute;
+    right: 0; /* Positioned at the far right of the container */
+    width: 50px; /* Match half of 100px input width */
+    height: 50px; /* Match half of 100px input height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--phosphor-primary);
+    font-size: 2rem; /* Larger arrows for bigger buttons */
+    cursor: pointer;
+    text-shadow: 0 0 10px var(--phosphor-primary);
+    transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+    user-select: none;
+    border-left: 1px solid var(--phosphor-dim);
+    background: rgba(26, 128, 26, 0.15);
+    font-weight: bold;
+    padding: 0;
+    border-radius: 0px;
+}
+
+.spinbox-btn:hover {
+    background: rgba(26, 128, 26, 0.35);
+    text-shadow: 0 0 15px var(--phosphor-primary);
+    color: #66ff66;
+    transform: scale(1.1);
+}
+
+.spinbox-btn:active {
+    background: rgba(26, 128, 26, 0.5);
+    text-shadow: 0 0 18px var(--phosphor-primary);
+    color: #99ff99;
+    transform: scale(0.95);
+}
+
+.spinbox-up {
+    top: 0;
+    border-bottom: 1px solid var(--phosphor-dim);
+    border-top-right-radius: 0px;
+}
+
+.spinbox-down {
+    bottom: 0;
+    border-bottom-right-radius: 0px;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: var(--phosphor-primary);
+    box-shadow: 0 0 15px var(--phosphor-dim), inset 0 0 10px rgba(51, 255, 51, 0.08);
+    background: #001100;
+}
+
+input[type="number"]:focus + .spinbox-btn {
+    border-color: var(--phosphor-primary);
 }
 
 input[type="password"] {
@@ -298,25 +422,38 @@ input:focus, select:focus {
 /* Card selection styles */
 .cards-container { 
     display: flex; 
+    height: 220px;
     gap: 10px; 
     justify-content: flex-start; 
     margin-top: 5px; 
 }
 .card { 
-    border: 1px solid #333; 
-    padding: 12px 10px; 
+    border: 2px solid #444; 
+    padding: 20px 14px; 
     text-align: center; 
     cursor: pointer; 
-    transition: all 0.2s ease;
-    opacity: 0.5; 
-    font-size: 1.1rem;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    opacity: 0.65; 
+    font-size: 1.15rem;
     text-transform: uppercase;
     background: transparent;
+    box-sizing: border-box;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 .card:hover { 
     opacity: 1; 
-    transform: translateY(-3px);
-    background: rgba(51, 255, 51, 0.137);
+    transform: scale(1.05);
+    background: rgba(51, 255, 51, 0.12);
+    border-color: rgba(51, 255, 51, 0.7);
+    box-shadow: 0 0 12px rgba(51, 255, 51, 0.25);
 }
 .card.green { color: var(--phosphor-primary); border-color: var(--phosphor-dim); }
 .card.yellow { color: var(--phosphor-warn); border-color: var(--phosphor-warn); }
@@ -325,14 +462,35 @@ input:focus, select:focus {
 
 .card.active {
     opacity: 1;
-    transform: translateY(-3px) scale(1.05);
+    transform: scale(1.12);
     font-weight: bold;
-    box-shadow: 0 0 15px;
+    border-width: 2px;
+    box-shadow: inset 0 0 15px;
 }
-.card.green.active { box-shadow: 0 0 15px var(--phosphor-primary); background: var(--phosphor-dim);}
-.card.yellow.active { box-shadow: 0 0 15px var(--phosphor-warn); background: #333300;}
-.card.red.active { box-shadow: 0 0 15px var(--phosphor-alert); background: #330000;}
-.card.black.active { box-shadow: 0 0 15px #666; background: #222;}
+.card.green.active { 
+    box-shadow: 0 0 32px var(--phosphor-primary), inset 0 0 15px var(--phosphor-primary); 
+    background: rgba(51, 255, 51, 0.3); 
+    border-color: var(--phosphor-primary);
+    color: #66ff66;
+}
+.card.yellow.active { 
+    box-shadow: 0 0 32px var(--phosphor-warn), inset 0 0 15px var(--phosphor-warn); 
+    background: rgba(255, 255, 51, 0.25); 
+    border-color: var(--phosphor-warn);
+    color: #ffff99;
+}
+.card.red.active { 
+    box-shadow: 0 0 32px var(--phosphor-alert), inset 0 0 15px var(--phosphor-alert); 
+    background: rgba(255, 51, 51, 0.25); 
+    border-color: var(--phosphor-alert);
+    color: #ff9999;
+}
+.card.black.active { 
+    box-shadow: 0 0 32px #999, inset 0 0 15px #666; 
+    background: rgba(120, 120, 120, 0.2); 
+    border-color: #aaa;
+    color: #aaa;
+}
 
 
 /* Utility classes */
@@ -342,6 +500,19 @@ input:focus, select:focus {
 
 /* --- ROW COLORING LOGIC (TRIAGE) --- */
 /* This ensures the color is applied to all cells in the row */
+
+tr[class^="row-"] {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><filter id="glow2"><feGaussianBlur stdDeviation="1.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="10" cy="10" r="4" fill="%23ffff33" opacity="0.95" filter="url(%23glow2)"/><line x1="10" y1="0" x2="10" y2="5" stroke="%23ffff33" stroke-width="2" opacity="0.9"/><line x1="10" y1="15" x2="10" y2="32" stroke="%23ffff33" stroke-width="2" opacity="0.9"/><line x1="0" y1="10" x2="5" y2="10" stroke="%23ffff33" stroke-width="2" opacity="0.9"/><line x1="15" y1="10" x2="32" y2="10" stroke="%23ffff33" stroke-width="2" opacity="0.9"/><circle cx="10" cy="10" r="5.5" fill="none" stroke="%23ffff33" stroke-width="1.5" opacity="0.8" filter="url(%23glow2)"/></svg>') 10 10, pointer;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+tr[class^="row-"]:hover {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><filter id="glow2"><feGaussianBlur stdDeviation="1.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="10" cy="10" r="4" fill="%23ffff33" opacity="0.95" filter="url(%23glow2)"/><line x1="10" y1="0" x2="10" y2="5" stroke="%23ffff33" stroke-width="2" opacity="0.9"/><line x1="10" y1="15" x2="10" y2="32" stroke="%23ffff33" stroke-width="2" opacity="0.9"/><line x1="0" y1="10" x2="5" y2="10" stroke="%23ffff33" stroke-width="2" opacity="0.9"/><line x1="15" y1="10" x2="32" y2="10" stroke="%23ffff33" stroke-width="2" opacity="0.9"/><circle cx="10" cy="10" r="5.5" fill="none" stroke="%23ffff33" stroke-width="1.5" opacity="0.8" filter="url(%23glow2)"/></svg>') 10 10, pointer;
+    filter: brightness(1.18);
+    transform: scale(1.005);
+    box-shadow: inset 0 0 15px rgba(51, 255, 51, 0.1);
+}
 
 /* YELLOW (Caution/Viral) */
 tr.row-yellow td {
@@ -421,37 +592,57 @@ tr.row-green td {
 .threat-carousel-wrapper {
     display: flex;
     align-items: center;
-    gap: 20px; /* Space between arrows and carousel */
-    margin-top: 10px;
-    grid-column: 1 / -1; /* Ensure it spans full width in the grid */
-    overflow: hidden; /* Hide anything that goes beyond the wrapper's bounds */
+    height: 220px;
+    gap: 15px;
+    margin-top: 35px;
+    grid-column: 1 / -1;
+    overflow: hidden;
+    padding: 15px 0;
+    position: relative;
 }
 
 .threat-carousel-inner {
     display: flex;
-    overflow-x: scroll; /* Enable horizontal scrolling */
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling for iOS */
-    scroll-behavior: smooth; /* Smooth scroll when buttons are clicked */
-    flex-grow: 1; /* Allow inner container to take available space */
-    padding-bottom: 5px; /* To prevent content from being hidden by scrollbar on some systems */
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    flex-grow: 1;
+    padding: 5px 0;
+    gap: 8px;
+    align-items: stretch;
+    border: 1px solid rgba(51, 255, 51, 0.1);
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.3);
 
-    /* Hide scrollbar for a cleaner look */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: thin;
+    scrollbar-color: var(--phosphor-dim) #000;
 }
 
 .threat-carousel-inner::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
+    height: 6px;
+}
+
+.threat-carousel-inner::-webkit-scrollbar-track {
+    background: #000;
+}
+
+.threat-carousel-inner::-webkit-scrollbar-thumb {
+    background: var(--phosphor-dim);
+    border-radius: 3px;
 }
 
 .threat-carousel-inner .card {
-    flex-shrink: 0; /* Prevent cards from shrinking */
-    width: 120px; /* Adjust card width as needed */
-    margin-right: 10px; /* Space between cards */
+    flex-shrink: 0;
+    width: 160px;
+    min-width: 160px;
+    margin: 0;
+    overflow: visible;
+    border: 2px solid #444;
+    min-height: 180px;
 }
 
 .threat-carousel-inner .card:last-child {
-    margin-right: 0; /* No margin on the last card */
+    margin-right: 0;
 }
 
 .carousel-arrow {
@@ -618,4 +809,61 @@ a {
         transform: scaleY(0.95) translateY(-20px);
         filter: brightness(0) contrast(0);
     }
+}
+/* ============================================================================ */
+/* THEME TOGGLE BUTTON FOR TERMINAL (VISIBLE & ALWAYS ACCESSIBLE)             */
+/* ============================================================================ */
+
+.theme-toggle-button-terminal {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    z-index: 160;
+    width: 50px;
+    height: 50px;
+    background: #020202;
+    border: 2px solid var(--phosphor-primary);
+    color: var(--phosphor-primary);
+    font-size: 1.4rem;
+    font-family: 'VT323', monospace;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    text-shadow: 0 0 5px var(--phosphor-primary);
+    pointer-events: auto;
+    clip-path: polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%);
+}
+
+.theme-toggle-button-terminal::before {
+    content: '▬';
+    font-size: 1.6rem;
+}
+
+.theme-toggle-button-terminal:hover {
+    background: #050505;
+    border-color: var(--phosphor-warn);
+    box-shadow: 0 0 15px var(--phosphor-warn);
+    text-shadow: 0 0 12px var(--phosphor-warn);
+}
+
+.theme-toggle-button-terminal:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 10px var(--phosphor-primary);
+}
+
+/* Active state for Fallout theme */
+body.theme-fallout .theme-toggle-button-terminal {
+    border-color: var(--pipboy-primary);
+    color: var(--pipboy-primary);
+    text-shadow: 0 0 5px var(--pipboy-primary);
+}
+
+body.theme-fallout .theme-toggle-button-terminal:hover {
+    border-color: var(--pipboy-accent);
+    box-shadow: 0 0 15px var(--pipboy-accent);
+    text-shadow: 0 0 12px var(--pipboy-accent);
 }

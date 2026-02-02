@@ -5,8 +5,15 @@
     <title>AESCULAPIUS: OMEGA PROTOCOL</title>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/retro_style.css">
+    <link rel="stylesheet" href="/static/fallout-theme.css">
     <script>
         const USER_ROLE = "{{ user_role }}";
+        // Early theme initialization to prevent flash
+        (function() {
+            if (localStorage.getItem('themeMode') === 'fallout') {
+                document.documentElement.classList.add('theme-fallout');
+            }
+        })();
     </script>
 </head>
 <body>
@@ -18,11 +25,14 @@
             
             <div class="content-layer">
                 
-                <div class="panel control-panel">
+                <div class="panel control-panel" style="position: relative;">
+                    <!-- VISIBLE THEME TOGGLE BUTTON FOR TERMINAL -->
+                    <button class="theme-toggle-button-terminal" id="themeToggleBtnTerminal" title="Switch Interface Theme"></button>
+                    
                     <div class="header-box">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                             <div style="flex-grow: 1;">
-                                <h1 style="font-size: 2.5rem;">AESCULAPIUS <span class="blink">_ V1.4.9 SECURE</span></h1>
+                                <h1 style="font-size: 2.5rem;">AESCULAPIUS <span class="blink">_ V1.5.0 SECURE</span></h1>
                                 <div class="user-badge">
                                     <div class="sub-header">USER: {{ user_name }} // ROLE: {{ user_role|upper }} // TERMINAL: 04-B</div>
                                 </div>
@@ -103,14 +113,14 @@
                 <label for="assignedRoom">ASSIGNED ROOM:</label>
                 <select id="assignedRoom"></select>
                 
-                <div class="full-width" style="display:flex; gap:20px; grid-column: 1 / -1;">
-                    <div style="flex:1">
-                        <label for="subjectHR" style="text-align:left; padding: 0; margin-bottom: 5px; display:block;">HEART RATE:</label> 
-                        <input type="number" id="subjectHR">
+                <div class="full-width">
+                    <div class="HRSPO2">
+                        <label for="subjectHR">HEART RATE:</label> 
+                        <input type="number" id="subjectHR" min="0" max="300">
                     </div>
-                    <div style="flex:1">
-                        <label for="subjectSPO2" style="text-align:left; padding: 0; margin-bottom: 5px; display:block;">SPO2 (%):</label> 
-                        <input type="number" id="subjectSPO2">
+                    <div class="HRSPO2">
+                        <label for="subjectSPO2">SPO2 (%):</label> 
+                        <input type="number" id="subjectSPO2" min="0" max="100">
                     </div>
                 </div>
 
@@ -130,6 +140,51 @@
     </div>
 
     <script>
+        // === THEME TOGGLE FUNCTIONALITY (TERMINAL) ===
+        const themeToggleBtnTerminal = document.getElementById('themeToggleBtnTerminal');
+        let isFalloutThemeActive = localStorage.getItem('themeMode') === 'fallout';
+
+        function initializeThemeTerminal() {
+            if (isFalloutThemeActive) {
+                document.body.classList.add('theme-fallout');
+                document.documentElement.classList.add('theme-fallout');
+                updateThemeToggleButtonTerminalUI();
+            }
+        }
+
+        function updateThemeToggleButtonTerminalUI() {
+            if (isFalloutThemeActive) {
+                themeToggleBtnTerminal.style.opacity = '1';
+                themeToggleBtnTerminal.style.borderColor = 'var(--pipboy-primary)';
+                themeToggleBtnTerminal.style.boxShadow = '0 0 15px var(--pipboy-primary)';
+            } else {
+                themeToggleBtnTerminal.style.opacity = '0.6';
+                themeToggleBtnTerminal.style.borderColor = 'var(--phosphor-dim)';
+                themeToggleBtnTerminal.style.boxShadow = '0 0 8px var(--phosphor-dim)';
+            }
+        }
+
+        themeToggleBtnTerminal.addEventListener('click', function(e) {
+            e.stopPropagation();
+            isFalloutThemeActive = !isFalloutThemeActive;
+            localStorage.setItem('themeMode', isFalloutThemeActive ? 'fallout' : 'default');
+            
+            if (isFalloutThemeActive) {
+                document.body.classList.add('theme-fallout');
+                document.documentElement.classList.add('theme-fallout');
+            } else {
+                document.body.classList.remove('theme-fallout');
+                document.documentElement.classList.remove('theme-fallout');
+            }
+            
+            updateThemeToggleButtonTerminalUI();
+        });
+
+        // Initialize theme on page load
+        window.addEventListener('load', function() {
+            initializeThemeTerminal();
+        });
+
         // --- GLOBAL DATA STORAGE ---
         let allDoctors = [];
         let allRooms = [];
@@ -362,23 +417,45 @@
 
             allThreats.forEach(threat => {
                 const card = document.createElement('div');
-                card.className = `card ${threat.name.toLowerCase()}`;
+                // Determine color class based on threat name (green by default)
+                let colorClass = 'green';
+                const name = threat.name.toLowerCase();
+                
+                if (name.includes('yellow') || name.includes('influenza') || name.includes('cold') || name.includes('mild')) {
+                    colorClass = 'yellow';
+                } else if (name.includes('red') || name.includes('critical') || name.includes('severe') || name.includes('heart') || name.includes('stroke')) {
+                    colorClass = 'red';
+                } else if (name.includes('black') || name.includes('death') || name.includes('fatal') || name.includes('necrotic')) {
+                    colorClass = 'black';
+                }
+                
+                card.className = `card ${colorClass}`;
                 card.innerText = threat.name;
                 card.onclick = () => selectThreatCard(threat.id);
+                card.dataset.threatId = threat.id;
                 container.appendChild(card);
             });
         }
 
         function selectThreatCard(threatId) {
+            // Set the hidden input value
             document.getElementById('threatId').value = threatId;
             
             const container = document.getElementById('threatCards');
             const cards = container.querySelectorAll('.card');
             
+            let found = false;
             cards.forEach(card => {
                 const cardThreat = allThreats.find(t => t.name.toLowerCase() === card.innerText.toLowerCase());
                 if (cardThreat && cardThreat.id === threatId) {
-                    card.classList.add('active');
+                    // Only add active if not already active, otherwise toggle
+                    if (card.classList.contains('active')) {
+                        // Already active - keep it active (no change needed)
+                        card.classList.add('active');
+                    } else {
+                        card.classList.add('active');
+                    }
+                    found = true;
                 } else {
                     card.classList.remove('active');
                 }
@@ -419,7 +496,62 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', updateToggleButtonUI);
+        // --- SPINBOX ARROW HANDLERS ---
+        document.addEventListener('DOMContentLoaded', function() {
+            updateToggleButtonUI();
+            
+            // Create spinbox buttons dynamically
+            const spinboxDivs = document.querySelectorAll('.full-width > div');
+            
+            spinboxDivs.forEach((div, index) => {
+                const input = div.querySelector('input[type="number"]');
+                if (!input) return;
+                
+                // Create UP button
+                const upBtn = document.createElement('div');
+                upBtn.className = 'spinbox-btn spinbox-up';
+                upBtn.textContent = '▲';
+                upBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const maxVal = parseInt(input.max) || 300;
+                    const currentVal = parseInt(input.value || 0);
+                    input.value = Math.min(currentVal + 1, maxVal);
+                    input.dispatchEvent(new Event('change'));
+                });
+                
+                // Create DOWN button
+                const downBtn = document.createElement('div');
+                downBtn.className = 'spinbox-btn spinbox-down';
+                downBtn.textContent = '▼';
+                downBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const minVal = parseInt(input.min) || 0;
+                    const currentVal = parseInt(input.value || 0);
+                    input.value = Math.max(currentVal - 1, minVal);
+                    input.dispatchEvent(new Event('change'));
+                });
+                
+                // Add input validation for max constraint
+                input.addEventListener('input', function() {
+                    const maxVal = parseInt(this.max);
+                    const minVal = parseInt(this.min) || 0;
+                    let val = parseInt(this.value);
+                    
+                    if (val > maxVal) {
+                        this.value = maxVal;
+                    } else if (val < minVal) {
+                        this.value = minVal;
+                    }
+                });
+                
+                // Add buttons to div
+                div.appendChild(upBtn);
+                div.appendChild(downBtn);
+            });
+        });
     </script>
+    
+    <!-- Half-Life Audio System - Valve Audio Files Integration -->
+    <script src="/static/half-life-audio.js"></script>
 </body>
 </html>

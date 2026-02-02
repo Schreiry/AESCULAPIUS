@@ -385,3 +385,57 @@ input[type="password"].login-input:-webkit-autofill:active {
     color: #000;
     text-shadow: 0 0 15px var(--phosphor-warn), 0 0 8px var(--phosphor-primary);
 }
+
+/* ============================================================================ */
+/* THEME TOGGLE BUTTON                                                        */
+/* ============================================================================ */
+
+.theme-toggle-button {
+    position: fixed;
+    top: 20px;
+    right: 80px;
+    z-index: 150;
+    width: 50px;
+    height: 50px;
+    background: #000;
+    border: 2px solid var(--phosphor-dim);
+    color: var(--phosphor-primary);
+    font-size: 1.4rem;
+    font-family: 'VT323', monospace;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    clip-path: polygon(20% 0%, 80% 0%, 100% 20%, 100% 80%, 80% 100%, 20% 100%, 0% 80%, 0% 20%);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    text-shadow: 0 0 5px var(--phosphor-dim);
+    opacity: 0.6;
+}
+
+.theme-toggle-button::before {
+    content: '▬';
+    font-size: 1.8rem;
+}
+
+.theme-toggle-button:hover {
+    border-color: var(--phosphor-primary);
+    box-shadow: 0 0 15px var(--phosphor-primary);
+    opacity: 0.9;
+    text-shadow: 0 0 8px var(--phosphor-primary);
+}
+
+/* Active state for theme-fallout */
+body.theme-fallout .theme-toggle-button,
+html.theme-fallout .theme-toggle-button {
+    opacity: 1;
+    border-color: var(--pipboy-primary);
+    box-shadow: 0 0 15px var(--pipboy-primary);
+    text-shadow: 0 0 8px var(--pipboy-primary);
+}
+
+body.theme-fallout .theme-toggle-button:hover,
+html.theme-fallout .theme-toggle-button:hover {
+    box-shadow: 0 0 25px var(--pipboy-primary);
+    text-shadow: 0 0 12px var(--pipboy-primary);
+}

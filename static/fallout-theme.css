@@ -1,0 +1,1195 @@
+/* ============================================================================ */
+/* FALLOUT: NEW VEGAS - THEME CSS                                             */
+/* Атомпанк эстетика, янтарный монохром, эффект Pip-Boy 3000                 */
+/* ============================================================================ */
+
+/* --- CSS ПЕРЕМЕННЫЕ ДЛЯ FALLOUT ТЕМЫ --- */
+html.theme-fallout,
+body.theme-fallout {
+    --pipboy-primary: #FFB642;      /* Янтарный/желтый основной цвет P1 Phosphor */
+    --pipboy-primary-dark: #CC8A2F; /* Темный янтарь для неактивных элементов */
+    --pipboy-bg: #0F0F0F;           /* Глубокий черный фон */
+    --pipboy-accent: #FFD700;       /* Ярче желтый для активных элементов */
+    --pipboy-danger: #FF6B35;       /* Оранжевый для предупреждений */
+    --scanline-color: rgba(0, 0, 0, 0.3);
+    --glitch-color: rgba(255, 182, 66, 0.1);
+}
+
+/* ============================================================================ */
+/* ГЛОБАЛЬНЫЕ СТИЛИ FALLOUT ТЕМЫ                                              */
+/* ============================================================================ */
+
+html.theme-fallout {
+    background-color: #050505 !important;
+    color: var(--pipboy-primary) !important;
+    /* Custom amber cursor for Fallout theme */
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><filter id="amber-glow"><feGaussianBlur stdDeviation="1.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="10" cy="10" r="4" fill="%23FFB642" opacity="0.95" filter="url(%23amber-glow)"/><line x1="10" y1="0" x2="10" y2="5" stroke="%23FFB642" stroke-width="2" opacity="0.9"/><line x1="10" y1="15" x2="10" y2="32" stroke="%23FFB642" stroke-width="2" opacity="0.9"/><line x1="0" y1="10" x2="5" y2="10" stroke="%23FFB642" stroke-width="2" opacity="0.9"/><line x1="15" y1="10" x2="32" y2="10" stroke="%23FFB642" stroke-width="2" opacity="0.9"/><circle cx="10" cy="10" r="5.5" fill="none" stroke="%23FFB642" stroke-width="1.5" opacity="0.7" filter="url(%23amber-glow)"/></svg>') 10 10, auto;
+}
+
+body.theme-fallout {
+    background-color: #050505 !important;
+    color: var(--pipboy-primary) !important;
+    /* Custom amber cursor for Fallout theme */
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><defs><filter id="amber-glow"><feGaussianBlur stdDeviation="1.5" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><circle cx="10" cy="10" r="4" fill="%23FFB642" opacity="0.95" filter="url(%23amber-glow)"/><line x1="10" y1="0" x2="10" y2="5" stroke="%23FFB642" stroke-width="2" opacity="0.9"/><line x1="10" y1="15" x2="10" y2="32" stroke="%23FFB642" stroke-width="2" opacity="0.9"/><line x1="0" y1="10" x2="5" y2="10" stroke="%23FFB642" stroke-width="2" opacity="0.9"/><line x1="15" y1="10" x2="32" y2="10" stroke="%23FFB642" stroke-width="2" opacity="0.9"/><circle cx="10" cy="10" r="5.5" fill="none" stroke="%23FFB642" stroke-width="1.5" opacity="0.7" filter="url(%23amber-glow)"/></svg>') 10 10, auto;
+}
+
+html.theme-fallout,
+body.theme-fallout,
+html.theme-fallout *,
+body.theme-fallout * {
+    transition: background-color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                border-color 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Custom cursors for interactive elements */
+body.theme-fallout button,
+body.theme-fallout input[type="submit"],
+body.theme-fallout input[type="button"],
+body.theme-fallout a,
+body.theme-fallout .clickable {
+    cursor: pointer !important;
+}
+
+body.theme-fallout input[type="text"],
+body.theme-fallout input[type="password"],
+body.theme-fallout input[type="number"],
+body.theme-fallout textarea,
+body.theme-fallout select {
+    cursor: text !important;
+}
+
+/* ============================================================================ */
+/* CRT ЭФФЕКТЫ ДЛЯ FALLOUT ТЕМЫ                                               */
+/* ============================================================================ */
+
+body.theme-fallout .crt-screen {
+    background: radial-gradient(circle, #1A1500 0%, #050505 100%) !important;
+    box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.95) !important;
+}
+
+body.theme-fallout .scanlines {
+    background: linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0%,
+        rgba(0, 0, 0, 0) 50%,
+        rgba(0, 0, 0, 0.15) 100%
+    ) !important;
+    background-size: 100% 4px !important;
+}
+
+body.theme-fallout .crt-overlay {
+    background: radial-gradient(
+        circle at 50% 50%,
+        rgba(255, 182, 66, 0.015) 0%,
+        rgba(0, 0, 0, 0.4) 90%
+    ) !important;
+    animation: fallout-flicker 0.15s infinite !important;
+}
+
+@keyframes fallout-flicker {
+    0% { opacity: 0.98; }
+    10% { opacity: 0.96; }
+    20% { opacity: 0.94; }
+    30% { opacity: 0.97; }
+    50% { opacity: 0.95; }
+    70% { opacity: 0.93; }
+    100% { opacity: 0.98; }
+}
+
+/* ============================================================================ */
+/* ЗАГОЛОВОК И ПАНЕЛИ FALLOUT СТИЛЯ                                           */
+/* ============================================================================ */
+
+body.theme-fallout .system-header {
+    border-bottom: 2px solid var(--pipboy-primary) !important;
+    text-shadow: 0 0 10px var(--pipboy-primary),
+                 0 0 20px rgba(255, 182, 66, 0.3) !important;
+}
+
+body.theme-fallout .title-block h1 {
+    font-size: 2.5rem !important;
+    letter-spacing: 3px !important;
+    text-shadow: 0 0 8px var(--pipboy-primary),
+                 0 0 16px rgba(255, 182, 66, 0.2) !important;
+    animation: fallout-title-glow 3s ease-in-out infinite;
+}
+
+@keyframes fallout-title-glow {
+    0%, 100% { text-shadow: 0 0 8px var(--pipboy-primary), 0 0 16px rgba(255, 182, 66, 0.2); }
+    50% { text-shadow: 0 0 12px var(--pipboy-primary), 0 0 24px rgba(255, 182, 66, 0.4); }
+}
+
+body.theme-fallout .title-block .subtitle {
+    color: var(--pipboy-primary-dark) !important;
+}
+
+body.theme-fallout .system-status {
+    color: var(--pipboy-primary) !important;
+    text-shadow: 0 0 5px var(--pipboy-primary) !important;
+}
+
+/* ============================================================================ */
+/* ТАБЛИЦА И ЭЛЕМЕНТЫ FALLOUT СТИЛЯ                                           */
+/* ============================================================================ */
+
+body.theme-fallout table {
+    border-collapse: collapse !important;
+}
+
+body.theme-fallout thead {
+    background: #0F0F0F !important;
+    border-bottom: 2px solid var(--pipboy-primary) !important;
+}
+
+body.theme-fallout th {
+    color: var(--pipboy-primary) !important;
+    text-shadow: 0 0 5px var(--pipboy-primary) !important;
+    border: 1px solid rgba(255, 182, 66, 0.3) !important;
+    padding: 12px 8px !important;
+    background: #050505 !important;
+    letter-spacing: 1px !important;
+}
+
+body.theme-fallout td {
+    color: var(--pipboy-primary) !important;
+    border: 1px solid rgba(255, 182, 66, 0.2) !important;
+    padding: 10px 8px !important;
+}
+
+body.theme-fallout tr:hover td {
+    background-color: rgba(255, 182, 66, 0.08) !important;
+    color: var(--pipboy-accent) !important;
+    text-shadow: 0 0 8px var(--pipboy-accent) !important;
+    border-color: var(--pipboy-primary) !important;
+}
+
+/* ============================================================================ */
+/* СТАТУС-ЦВЕТА ДЛЯ FALLOUT ТЕМЫ                                              */
+/* ============================================================================ */
+
+body.theme-fallout .status-Green {
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .status-Yellow {
+    color: var(--pipboy-accent) !important;
+    text-shadow: 0 0 8px var(--pipboy-accent) !important;
+}
+
+body.theme-fallout .status-Red {
+    color: var(--pipboy-danger) !important;
+    text-shadow: 0 0 10px var(--pipboy-danger) !important;
+    animation: fallout-pulse-red 1s infinite !important;
+}
+
+body.theme-fallout .status-Black {
+    color: #444444 !important;
+    text-decoration: line-through !important;
+}
+
+@keyframes fallout-pulse-red {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; text-shadow: 0 0 15px var(--pipboy-danger); }
+}
+
+/* ============================================================================ */
+/* СТРОКИ ТАБЛИЦЫ С ЦВЕТОВОЙ КОДИРОВКОЙ (FALLOUT)                             */
+/* ============================================================================ */
+
+body.theme-fallout tr.row-green td {
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout tr.row-yellow td {
+    color: var(--pipboy-accent) !important;
+    text-shadow: 0 0 5px var(--pipboy-accent) !important;
+}
+
+body.theme-fallout tr.row-red td {
+    color: var(--pipboy-danger) !important;
+    text-shadow: 0 0 8px var(--pipboy-danger) !important;
+}
+
+body.theme-fallout tr.row-black td {
+    color: #666666 !important;
+}
+
+body.theme-fallout tr[class^="row-"]:hover {
+    background-color: rgba(255, 182, 66, 0.1) !important;
+}
+
+/* ============================================================================ */
+/* МОДАЛЬНЫЕ ОКНА И ФОРМЫ (FALLOUT СТИЛЬ)                                     */
+/* ============================================================================ */
+
+body.theme-fallout .modal-overlay,
+body.theme-fallout #patientModalOverlay,
+body.theme-fallout .overlay,
+body.theme-fallout .dialog-overlay {
+    background: rgba(5, 5, 5, 0.92) !important;
+    backdrop-filter: blur(4px) !important;
+    z-index: 1000 !important;
+}
+
+body.theme-fallout .modal-window,
+body.theme-fallout .modal,
+body.theme-fallout .dialog,
+body.theme-fallout .popup {
+    background: linear-gradient(135deg, #0F0F0F 0%, #050505 100%) !important;
+    border: 2px solid var(--pipboy-primary) !important;
+    box-shadow: 0 0 50px rgba(255, 182, 66, 0.4),
+                inset 0 0 40px rgba(255, 182, 66, 0.08),
+                0 0 100px rgba(255, 182, 66, 0.15) !important;
+    animation: fallout-modal-appear 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes fallout-modal-appear {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-10px);
+        filter: brightness(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+        filter: brightness(1);
+    }
+}
+
+body.theme-fallout .modal-window h1,
+body.theme-fallout .modal-window h2,
+body.theme-fallout .modal-window h3,
+body.theme-fallout .modal h1,
+body.theme-fallout .modal h2,
+body.theme-fallout .modal h3,
+body.theme-fallout .dialog h1,
+body.theme-fallout .dialog h2,
+body.theme-fallout .dialog h3 {
+    color: var(--pipboy-primary) !important;
+    text-shadow: 0 0 12px var(--pipboy-primary) !important;
+    border-bottom: 1px solid rgba(255, 182, 66, 0.5) !important;
+    letter-spacing: 2px !important;
+    font-size: 1.3rem !important;
+}
+
+body.theme-fallout .modal-window p,
+body.theme-fallout .modal-window span,
+body.theme-fallout .modal-window div,
+body.theme-fallout .modal p,
+body.theme-fallout .modal span,
+body.theme-fallout .modal div,
+body.theme-fallout .dialog p,
+body.theme-fallout .dialog span,
+body.theme-fallout .dialog div {
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .modal-window label,
+body.theme-fallout .modal label,
+body.theme-fallout .dialog label {
+    color: var(--pipboy-primary) !important;
+    text-shadow: 0 0 3px var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .form-grid {
+    background: rgba(0, 0, 0, 0.2) !important;
+    padding: 15px !important;
+    border: 1px solid rgba(255, 182, 66, 0.2) !important;
+    border-radius: 2px !important;
+}
+
+body.theme-fallout .modal-footer,
+body.theme-fallout .modal-actions,
+body.theme-fallout .dialog-actions {
+    border-top: 1px solid rgba(255, 182, 66, 0.3) !important;
+    padding: 15px !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Close buttons in modals */
+body.theme-fallout .modal-close,
+body.theme-fallout .close-btn,
+body.theme-fallout .modal-window .close {
+    color: var(--pipboy-primary) !important;
+    border: 1px solid var(--pipboy-primary) !important;
+    background: #050505 !important;
+}
+
+body.theme-fallout .modal-close:hover,
+body.theme-fallout .close-btn:hover,
+body.theme-fallout .modal-window .close:hover {
+    color: #050505 !important;
+    background: var(--pipboy-primary) !important;
+    box-shadow: 0 0 15px var(--pipboy-primary) !important;
+}
+
+/* Confirmation dialogs */
+body.theme-fallout .confirm-dialog,
+body.theme-fallout [role="alertdialog"],
+body.theme-fallout .alert-dialog {
+    border: 2px solid var(--pipboy-danger) !important;
+    box-shadow: 0 0 50px rgba(255, 107, 53, 0.4) !important;
+}
+
+body.theme-fallout .confirm-dialog h2,
+body.theme-fallout [role="alertdialog"] h2 {
+    color: var(--pipboy-danger) !important;
+    text-shadow: 0 0 12px var(--pipboy-danger) !important;
+}
+
+/* Info dialogs */
+body.theme-fallout .info-dialog,
+body.theme-fallout [role="dialog"].info {
+    border: 2px solid var(--pipboy-accent) !important;
+    box-shadow: 0 0 50px rgba(255, 215, 0, 0.3) !important;
+}
+
+body.theme-fallout .info-dialog h2,
+body.theme-fallout [role="dialog"].info h2 {
+    color: var(--pipboy-accent) !important;
+    text-shadow: 0 0 12px var(--pipboy-accent) !important;
+}
+
+/* ============================================================================ */
+/* ФОРМА ВВОДА И СЕЛЕКТЫ (FALLOUT СТИЛЬ)                                      */
+/* ============================================================================ */
+
+body.theme-fallout input[type="text"],
+body.theme-fallout input[type="password"],
+body.theme-fallout input[type="number"],
+body.theme-fallout select {
+    background: #050505 !important;
+    color: var(--pipboy-primary) !important;
+    border: 1px solid var(--pipboy-primary-dark) !important;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5) !important;
+    text-shadow: 0 0 3px var(--pipboy-primary) !important;
+}
+
+body.theme-fallout input[type="text"]:focus,
+body.theme-fallout input[type="password"]:focus,
+body.theme-fallout input[type="number"]:focus,
+body.theme-fallout select:focus {
+    outline: none !important;
+    border-color: var(--pipboy-primary) !important;
+    box-shadow: 0 0 20px var(--pipboy-primary),
+                inset 0 0 10px rgba(255, 182, 66, 0.1) !important;
+    background: #0F0F0F !important;
+}
+
+body.theme-fallout input[type="text"]::placeholder,
+body.theme-fallout input[type="password"]::placeholder,
+body.theme-fallout input[type="number"]::placeholder {
+    color: var(--pipboy-primary-dark) !important;
+}
+
+body.theme-fallout input[type="text"]:-webkit-autofill,
+body.theme-fallout input[type="password"]:-webkit-autofill,
+body.theme-fallout select:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 30px #050505 inset !important;
+    -webkit-text-fill-color: var(--pipboy-primary) !important;
+    box-shadow: 0 0 0 30px #050505 inset !important;
+}
+
+/* ============================================================================ */
+/* КНОПКИ И ИНТЕРАКТИВНЫЕ ЭЛЕМЕНТЫ (FALLOUT СТИЛЬ)                            */
+/* ============================================================================ */
+
+body.theme-fallout button,
+body.theme-fallout input[type="submit"] {
+    background: #050505 !important;
+    color: var(--pipboy-primary) !important;
+    border: 1px solid var(--pipboy-primary) !important;
+    text-shadow: 0 0 5px var(--pipboy-primary) !important;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    letter-spacing: 1px !important;
+}
+
+body.theme-fallout button:hover,
+body.theme-fallout input[type="submit"]:hover {
+    background: var(--pipboy-primary) !important;
+    color: #050505 !important;
+    box-shadow: 0 0 25px var(--pipboy-primary),
+                inset 0 0 15px rgba(255, 182, 66, 0.2) !important;
+    text-shadow: none !important;
+}
+
+body.theme-fallout button:active,
+body.theme-fallout input[type="submit"]:active {
+    transform: scale(0.98) !important;
+    box-shadow: 0 0 15px var(--pipboy-primary) !important;
+}
+
+/* ============================================================================ */
+/* КАРТОЧКИ И ЭЛЕМЕНТЫ СПИСКОВ (FALLOUT СТИЛЬ)                                */
+/* ============================================================================ */
+
+body.theme-fallout .card {
+    background: #0F0F0F !important;
+    border: 1px solid var(--pipboy-primary-dark) !important;
+    color: var(--pipboy-primary) !important;
+    box-shadow: 0 0 10px rgba(255, 182, 66, 0.1) !important;
+}
+
+body.theme-fallout .card:hover {
+    border-color: var(--pipboy-primary) !important;
+    box-shadow: 0 0 20px rgba(255, 182, 66, 0.3) !important;
+    background: rgba(255, 182, 66, 0.05) !important;
+}
+
+body.theme-fallout .card.active {
+    background: rgba(255, 182, 66, 0.15) !important;
+    border-color: var(--pipboy-primary) !important;
+    box-shadow: 0 0 25px var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .card.green { 
+    color: var(--pipboy-primary) !important;
+    border-color: var(--pipboy-primary-dark) !important;
+}
+
+body.theme-fallout .card.yellow { 
+    color: var(--pipboy-accent) !important;
+    border-color: var(--pipboy-accent) !important;
+}
+
+body.theme-fallout .card.red { 
+    color: var(--pipboy-danger) !important;
+    border-color: var(--pipboy-danger) !important;
+}
+
+body.theme-fallout .card.black { 
+    color: #666 !important;
+    border-color: #666 !important;
+}
+
+body.theme-fallout .card.green.active {
+    box-shadow: 0 0 20px var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .card.yellow.active {
+    box-shadow: 0 0 20px var(--pipboy-accent) !important;
+}
+
+body.theme-fallout .card.red.active {
+    box-shadow: 0 0 20px var(--pipboy-danger) !important;
+}
+
+/* ============================================================================ */
+/* КНОПКИ ДЕЙСТВИЙ (MINI BUTTONS)                                             */
+/* ============================================================================ */
+
+body.theme-fallout .mini-btn {
+    background: #050505 !important;
+    color: var(--pipboy-primary) !important;
+    border: 1px solid var(--pipboy-primary-dark) !important;
+    transition: all 0.2s ease !important;
+}
+
+body.theme-fallout .mini-btn:hover {
+    background: var(--pipboy-primary) !important;
+    color: #050505 !important;
+    box-shadow: 0 0 10px var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .mini-btn.delete-btn {
+    border-color: var(--pipboy-danger) !important;
+    color: var(--pipboy-danger) !important;
+}
+
+body.theme-fallout .mini-btn.delete-btn:hover {
+    background: var(--pipboy-danger) !important;
+    color: #050505 !important;
+    box-shadow: 0 0 15px var(--pipboy-danger) !important;
+}
+
+/* ============================================================================ */
+/* СКРОЛБАРЫ (FALLOUT СТИЛЬ)                                                  */
+/* ============================================================================ */
+
+body.theme-fallout .data-panel::-webkit-scrollbar {
+    width: 8px !important;
+}
+
+body.theme-fallout .data-panel::-webkit-scrollbar-track {
+    background: #050505 !important;
+}
+
+body.theme-fallout .data-panel::-webkit-scrollbar-thumb {
+    background: var(--pipboy-primary-dark) !important;
+    border: 1px solid var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .data-panel::-webkit-scrollbar-thumb:hover {
+    background: var(--pipboy-primary) !important;
+}
+
+/* ============================================================================ */
+/* СЕЛЕКТОР УГРОЗ (THREAT CAROUSEL)                                           */
+/* ============================================================================ */
+
+body.theme-fallout .threat-carousel-wrapper {
+    border: 1px solid var(--pipboy-primary-dark) !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-fallout .threat-carousel-inner {
+    background: #050505 !important;
+}
+
+body.theme-fallout .threat-carousel-inner::-webkit-scrollbar-thumb {
+    background: var(--pipboy-primary-dark) !important;
+}
+
+body.theme-fallout .carousel-arrow {
+    background: #050505 !important;
+    color: var(--pipboy-primary) !important;
+    border: 1px solid var(--pipboy-primary-dark) !important;
+}
+
+body.theme-fallout .carousel-arrow:hover {
+    background: var(--pipboy-primary) !important;
+    color: #050505 !important;
+    box-shadow: 0 0 15px var(--pipboy-primary) !important;
+}
+
+/* ============================================================================ */
+/* СПЕЦИАЛЬНЫЕ КНОПКИ УПРАВЛЕНИЯ                                             */
+/* ============================================================================ */
+
+body.theme-fallout .btn-active-warn {
+    background: var(--pipboy-danger) !important;
+    color: #050505 !important;
+    box-shadow: 0 0 20px var(--pipboy-danger) !important;
+    border-color: var(--pipboy-danger) !important;
+    text-shadow: none !important;
+}
+
+body.theme-fallout .btn-active-warn:hover {
+    box-shadow: 0 0 30px var(--pipboy-danger),
+                inset 0 0 10px rgba(255, 107, 53, 0.2) !important;
+}
+
+/* ============================================================================ */
+/* ПОЛЬЗОВАТЕЛЬСКИЕ ЗНАЧКИ И ИЕРАРХИЯ                                         */
+/* ============================================================================ */
+
+body.theme-fallout .user-badge {
+    background: #0F0F0F !important;
+    border: 1px solid var(--pipboy-primary) !important;
+    color: var(--pipboy-primary) !important;
+    box-shadow: 0 0 10px rgba(255, 182, 66, 0.2) !important;
+}
+
+body.theme-fallout .hierarchy-container {
+    border: 1px solid var(--pipboy-primary-dark) !important;
+    background: rgba(0, 0, 0, 0.3) !important;
+}
+
+body.theme-fallout .h-node {
+    background: #050505 !important;
+    border: 1px solid var(--pipboy-primary-dark) !important;
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .h-node.active-node {
+    background: rgba(255, 182, 66, 0.1) !important;
+    border-color: var(--pipboy-primary) !important;
+    box-shadow: 0 0 15px var(--pipboy-primary) !important;
+    animation: fallout-node-glow 2s ease-in-out infinite;
+}
+
+@keyframes fallout-node-glow {
+    0%, 100% { box-shadow: 0 0 15px var(--pipboy-primary); }
+    50% { box-shadow: 0 0 25px var(--pipboy-primary); }
+}
+
+body.theme-fallout .h-line {
+    border-color: var(--pipboy-primary-dark) !important;
+}
+
+/* ============================================================================ */
+/* ССЫЛКИ                                                                      */
+/* ============================================================================ */
+
+body.theme-fallout a {
+    color: var(--pipboy-primary) !important;
+    text-decoration: underline !important;
+}
+
+body.theme-fallout a:hover {
+    color: var(--pipboy-accent) !important;
+    text-shadow: 0 0 8px var(--pipboy-accent) !important;
+}
+
+/* ============================================================================ */
+/* ПАНЕЛЬ УПРАВЛЕНИЯ (CONTROL PANEL)                                          */
+/* ============================================================================ */
+
+body.theme-fallout .control-panel {
+    border: 2px solid var(--pipboy-primary) !important;
+    background: rgba(5, 5, 5, 0.8) !important;
+    box-shadow: 0 0 20px rgba(255, 182, 66, 0.2),
+                inset 0 0 20px rgba(255, 182, 66, 0.05) !important;
+}
+
+body.theme-fallout .control-bar {
+    gap: 15px !important;
+}
+
+/* ============================================================================ */
+/* ПАНЕЛЬ ДАННЫХ (DATA PANEL)                                                 */
+/* ============================================================================ */
+
+body.theme-fallout .data-panel {
+    border-top: 1px solid var(--pipboy-primary-dark) !important;
+}
+
+body.theme-fallout .data-panel::-webkit-scrollbar {
+    width: 8px !important;
+}
+
+body.theme-fallout .data-panel::-webkit-scrollbar-track {
+    background: #050505 !important;
+}
+
+body.theme-fallout .data-panel::-webkit-scrollbar-thumb {
+    background: var(--pipboy-primary-dark) !important;
+    border: 1px solid rgba(255, 182, 66, 0.5) !important;
+}
+
+/* ============================================================================ */
+/* СПЕЦЭФФЕКТЫ ДЛЯ АНИМАЦИЙ ПЕРЕХОДОВ                                         */
+/* ============================================================================ */
+
+body.theme-fallout {
+    animation: theme-transition-in 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes theme-transition-in {
+    from {
+        filter: brightness(0.8) contrast(0.9);
+    }
+    to {
+        filter: brightness(1) contrast(1);
+    }
+}
+
+/* ============================================================================ */
+/* УТИЛИТЫ                                                                     */
+/* ============================================================================ */
+
+body.theme-fallout .blink {
+    animation: fallout-blinker 1s linear infinite !important;
+}
+
+@keyframes fallout-blinker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ============================================================================ */
+/* ПОЛНАЯ КОНВЕРСИЯ ВСЕХ ЗЕЛЕНЫХ ЦВЕТОВ И ЭЛЕМЕНТОВ                           */
+/* ============================================================================ */
+
+/* Конверсия всех green элементов */
+body.theme-fallout .green {
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .status-green {
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout [style*="color: #33ff33"],
+body.theme-fallout [style*="color:#33ff33"] {
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout [style*="border-color: #33ff33"],
+body.theme-fallout [style*="border-color:#33ff33"] {
+    border-color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout [style*="background: #33ff33"],
+body.theme-fallout [style*="background:#33ff33"],
+body.theme-fallout [style*="background-color: #33ff33"],
+body.theme-fallout [style*="background-color:#33ff33"] {
+    background-color: var(--pipboy-primary) !important;
+}
+
+/* Все текст-элементы должны быть янтарные */
+body.theme-fallout .status-success,
+body.theme-fallout .status-ok,
+body.theme-fallout .status-active,
+body.theme-fallout .status-ready {
+    color: var(--pipboy-primary) !important;
+    text-shadow: 0 0 8px var(--pipboy-primary) !important;
+}
+
+/* Иконки и спецсимволы */
+body.theme-fallout .icon-green,
+body.theme-fallout .symbol-green {
+    color: var(--pipboy-primary) !important;
+    text-shadow: 0 0 5px var(--pipboy-primary) !important;
+}
+
+/* Все input типы */
+body.theme-fallout input[type="checkbox"],
+body.theme-fallout input[type="radio"] {
+    accent-color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout input[type="checkbox"]:checked,
+body.theme-fallout input[type="radio"]:checked {
+    box-shadow: 0 0 10px var(--pipboy-primary) !important;
+}
+
+/* Textarea */
+body.theme-fallout textarea {
+    background: #050505 !important;
+    color: var(--pipboy-primary) !important;
+    border: 1px solid var(--pipboy-primary-dark) !important;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5) !important;
+    text-shadow: 0 0 3px var(--pipboy-primary) !important;
+}
+
+body.theme-fallout textarea:focus {
+    outline: none !important;
+    border-color: var(--pipboy-primary) !important;
+    box-shadow: 0 0 20px var(--pipboy-primary),
+                inset 0 0 10px rgba(255, 182, 66, 0.1) !important;
+    background: #0F0F0F !important;
+}
+
+/* Label элементы */
+body.theme-fallout label {
+    color: var(--pipboy-primary) !important;
+    text-shadow: 0 0 3px var(--pipboy-primary) !important;
+}
+
+/* Badges */
+body.theme-fallout .badge,
+body.theme-fallout .label {
+    background: rgba(255, 182, 66, 0.1) !important;
+    color: var(--pipboy-primary) !important;
+    border: 1px solid var(--pipboy-primary-dark) !important;
+}
+
+body.theme-fallout .badge.success,
+body.theme-fallout .label.success {
+    background: rgba(255, 182, 66, 0.15) !important;
+    border-color: var(--pipboy-primary) !important;
+}
+
+/* Info, Success, Warning, Error блоки */
+body.theme-fallout .alert,
+body.theme-fallout .alert-info,
+body.theme-fallout .alert-success,
+body.theme-fallout .info-block,
+body.theme-fallout .success-block {
+    background: rgba(255, 182, 66, 0.08) !important;
+    border: 1px solid var(--pipboy-primary) !important;
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .alert-warning,
+body.theme-fallout .warning-block {
+    background: rgba(255, 215, 0, 0.08) !important;
+    border: 1px solid var(--pipboy-accent) !important;
+    color: var(--pipboy-accent) !important;
+}
+
+body.theme-fallout .alert-danger,
+body.theme-fallout .alert-error,
+body.theme-fallout .error-block {
+    background: rgba(255, 107, 53, 0.08) !important;
+    border: 1px solid var(--pipboy-danger) !important;
+    color: var(--pipboy-danger) !important;
+}
+
+/* Progressbar */
+body.theme-fallout .progress,
+body.theme-fallout .progress-bar {
+    background: #050505 !important;
+    border: 1px solid var(--pipboy-primary-dark) !important;
+}
+
+body.theme-fallout .progress-bar {
+    background: linear-gradient(
+        90deg,
+        var(--pipboy-primary),
+        var(--pipboy-accent)
+    ) !important;
+    box-shadow: 0 0 15px var(--pipboy-primary) !important;
+}
+
+/* Lists */
+body.theme-fallout li,
+body.theme-fallout ul,
+body.theme-fallout ol {
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout li:hover {
+    background: rgba(255, 182, 66, 0.1) !important;
+}
+
+/* Divider */
+body.theme-fallout hr,
+body.theme-fallout .divider {
+    border-color: var(--pipboy-primary-dark) !important;
+    box-shadow: 0 0 5px rgba(255, 182, 66, 0.2) !important;
+}
+
+/* Tooltip */
+body.theme-fallout [title] {
+    border-bottom: 1px dotted var(--pipboy-primary) !important;
+}
+
+/* Code blocks */
+body.theme-fallout code,
+body.theme-fallout pre {
+    background: #050505 !important;
+    color: var(--pipboy-primary) !important;
+    border: 1px solid var(--pipboy-primary-dark) !important;
+    text-shadow: 0 0 3px var(--pipboy-primary) !important;
+}
+
+/* Table footer */
+body.theme-fallout tfoot {
+    border-top: 2px solid var(--pipboy-primary) !important;
+    background: #050505 !important;
+}
+
+body.theme-fallout tfoot td,
+body.theme-fallout tfoot th {
+    color: var(--pipboy-primary) !important;
+    text-shadow: 0 0 5px var(--pipboy-primary) !important;
+}
+
+/* Загруженные состояния */
+body.theme-fallout .loading,
+body.theme-fallout [data-loading="true"] {
+    animation: fallout-loading-pulse 0.8s infinite;
+}
+
+@keyframes fallout-loading-pulse {
+    0%, 100% {
+        opacity: 0.7;
+        box-shadow: 0 0 10px var(--pipboy-primary);
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 20px var(--pipboy-primary);
+    }
+}
+
+/* Data attributes для цветовых кодов */
+body.theme-fallout [data-status="green"],
+body.theme-fallout [data-color="green"],
+body.theme-fallout [data-state="active"] {
+    color: var(--pipboy-primary) !important;
+    text-shadow: 0 0 5px var(--pipboy-primary) !important;
+}
+
+body.theme-fallout [data-status="yellow"],
+body.theme-fallout [data-color="yellow"],
+body.theme-fallout [data-state="warning"] {
+    color: var(--pipboy-accent) !important;
+    text-shadow: 0 0 5px var(--pipboy-accent) !important;
+}
+
+body.theme-fallout [data-status="red"],
+body.theme-fallout [data-color="red"],
+body.theme-fallout [data-state="critical"] {
+    color: var(--pipboy-danger) !important;
+    text-shadow: 0 0 5px var(--pipboy-danger) !important;
+}
+
+/* Пользовательские элементы */
+body.theme-fallout [class*="green"] {
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout [class*="primary"] {
+    color: var(--pipboy-primary) !important;
+}
+
+/* Все элементы с явно указанным green цветом */
+body.theme-fallout span.green,
+body.theme-fallout div.green,
+body.theme-fallout p.green {
+    color: var(--pipboy-primary) !important;
+}
+
+/* ============================================================================ */
+/* РАСШИРЕННЫЕ АНИМАЦИИ И ЭФФЕКТЫ FALLOUT                                     */
+/* ============================================================================ */
+
+/* Глитч эффект для интерактивных элементов */
+@keyframes fallout-glitch {
+    0%, 100% {
+        text-shadow: 0 0 10px var(--pipboy-primary),
+                     -2px -2px 0 rgba(255, 107, 53, 0.3),
+                     2px 2px 0 rgba(255, 215, 0, 0.3);
+    }
+    50% {
+        text-shadow: 0 0 20px var(--pipboy-primary),
+                     2px 2px 0 rgba(255, 107, 53, 0.5),
+                     -2px -2px 0 rgba(255, 215, 0, 0.5);
+    }
+}
+
+body.theme-fallout button:active,
+body.theme-fallout input[type="submit"]:active {
+    animation: fallout-glitch 0.3s ease-out;
+}
+
+/* Сканирующий текстовый эффект */
+@keyframes fallout-text-scan {
+    0%, 100% {
+        text-shadow: 0 0 5px var(--pipboy-primary);
+    }
+    50% {
+        text-shadow: 0 0 15px var(--pipboy-primary),
+                     0 2px 5px rgba(255, 182, 66, 0.3);
+    }
+}
+
+body.theme-fallout .scan-text {
+    animation: fallout-text-scan 2s ease-in-out infinite;
+}
+
+/* PipBoy пульс для активных элементов */
+@keyframes fallout-pipboy-pulse {
+    0%, 100% {
+        box-shadow: 0 0 15px var(--pipboy-primary);
+    }
+    50% {
+        box-shadow: 0 0 30px var(--pipboy-primary),
+                    inset 0 0 20px rgba(255, 182, 66, 0.1);
+    }
+}
+
+body.theme-fallout button:hover,
+body.theme-fallout input[type="submit"]:hover,
+body.theme-fallout a:hover,
+body.theme-fallout .active {
+    animation: fallout-pipboy-pulse 1.5s ease-in-out infinite;
+}
+
+/* Мерцание для состояний загрузки */
+@keyframes fallout-loading-flicker {
+    0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        opacity: 0.98;
+        text-shadow: 0 0 10px var(--pipboy-primary);
+    }
+    20%, 24%, 55% {
+        opacity: 0.85;
+        text-shadow: 0 0 15px var(--pipboy-primary),
+                     0 0 5px rgba(255, 107, 53, 0.5);
+    }
+}
+
+body.theme-fallout .loading {
+    animation: fallout-loading-flicker 0.15s infinite;
+}
+
+/* Сканлайны мерцание */
+@keyframes fallout-scanline-flicker {
+    0%, 100% {
+        opacity: 0.03;
+    }
+    50% {
+        opacity: 0.05;
+    }
+}
+
+body.theme-fallout .scanlines {
+    animation: fallout-scanline-flicker 3s infinite;
+}
+
+/* Радиация/опасность пульс */
+@keyframes fallout-radiation-pulse {
+    0%, 100% {
+        color: var(--pipboy-primary);
+        text-shadow: 0 0 10px var(--pipboy-primary);
+    }
+    50% {
+        color: var(--pipboy-accent);
+        text-shadow: 0 0 20px var(--pipboy-accent),
+                     0 0 5px var(--pipboy-primary);
+    }
+}
+
+body.theme-fallout .status-Yellow,
+body.theme-fallout [data-status="warning"] {
+    animation: fallout-radiation-pulse 2s ease-in-out infinite;
+}
+
+/* Критическая ошибка - красный пульс */
+@keyframes fallout-critical-pulse {
+    0%, 100% {
+        color: var(--pipboy-danger);
+        text-shadow: 0 0 10px var(--pipboy-danger);
+    }
+    50% {
+        color: #FF0000;
+        text-shadow: 0 0 25px var(--pipboy-danger),
+                     0 0 5px rgba(255, 107, 53, 0.8);
+    }
+}
+
+body.theme-fallout .status-Red,
+body.theme-fallout [data-status="critical"] {
+    animation: fallout-critical-pulse 1s ease-in-out infinite;
+}
+
+/* Появление элементов с эффектом наведения */
+@keyframes fallout-element-reveal {
+    from {
+        opacity: 0;
+        text-shadow: 0 0 5px var(--pipboy-primary);
+    }
+    to {
+        opacity: 1;
+        text-shadow: 0 0 10px var(--pipboy-primary);
+    }
+}
+
+body.theme-fallout table tr {
+    animation: fallout-element-reveal 0.5s ease-out;
+}
+
+/* Фокус/выделение элемента */
+@keyframes fallout-focus-glow {
+    0%, 100% {
+        box-shadow: inset 0 0 10px rgba(255, 182, 66, 0.2),
+                    0 0 20px var(--pipboy-primary);
+    }
+    50% {
+        box-shadow: inset 0 0 20px rgba(255, 182, 66, 0.3),
+                    0 0 30px var(--pipboy-primary);
+    }
+}
+
+body.theme-fallout input:focus,
+body.theme-fallout select:focus,
+body.theme-fallout textarea:focus {
+    animation: fallout-focus-glow 1s ease-in-out infinite;
+}
+
+/* Элемент выделен */
+@keyframes fallout-highlight-scan {
+    0%, 100% {
+        background-color: rgba(255, 182, 66, 0.05);
+    }
+    50% {
+        background-color: rgba(255, 182, 66, 0.15);
+    }
+}
+
+body.theme-fallout tr:hover,
+body.theme-fallout li:hover {
+    animation: fallout-highlight-scan 1.5s ease-in-out infinite;
+}
+
+/* Ошибка - вибрирующий элемент */
+@keyframes fallout-error-shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-2px);
+    }
+    75% {
+        transform: translateX(2px);
+    }
+}
+
+body.theme-fallout .error,
+body.theme-fallout [data-error="true"] {
+    animation: fallout-error-shake 0.3s ease-out;
+    border-color: var(--pipboy-danger) !important;
+}
+
+/* Плавное переходящие элементы */
+@keyframes fallout-smooth-transition {
+    from {
+        opacity: 0.5;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+body.theme-fallout [class*="transition"],
+body.theme-fallout [data-animated="true"] {
+    animation: fallout-smooth-transition 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* SPINNIGNG элемент - для loader'ов */
+@keyframes fallout-spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+body.theme-fallout .spinner,
+body.theme-fallout [class*="spinner"],
+body.theme-fallout [class*="loader"] {
+    animation: fallout-spinner 1s linear infinite;
+}
+
+/* Пульс всего контента */
+@keyframes fallout-content-pulse {
+    0%, 100% {
+        filter: brightness(1) contrast(1);
+    }
+    50% {
+        filter: brightness(1.05) contrast(1.02);
+    }
+}
+
+body.theme-fallout .data-panel {
+    animation: fallout-content-pulse 4s ease-in-out infinite;
+}
+
+/* ============================================================================ */
+/* СПИНБОКС (NUMBER INPUT С КНОПКАМИ)                                         */
+/* ============================================================================ */
+
+body.theme-fallout .spinbox-btn {
+    background: #050505 !important;
+    border: 1px solid var(--pipboy-primary-dark) !important;
+    color: var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .spinbox-btn:hover {
+    background: var(--pipboy-primary) !important;
+    color: #050505 !important;
+    box-shadow: 0 0 10px var(--pipboy-primary) !important;
+}
+
+body.theme-fallout .spinbox-btn:active {
+    transform: scale(0.95) !important;
+}
+
+/* ============================================================================ */
+/* МАКСИМАЛЬНАЯ ЧЕТКОСТЬ И ЧИТАЕМОСТЬ                                         */
+/* ============================================================================ */
+
+body.theme-fallout {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+body.theme-fallout * {
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}

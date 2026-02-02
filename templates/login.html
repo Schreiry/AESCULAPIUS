@@ -6,9 +6,18 @@
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/retro_style.css">
     <link rel="stylesheet" href="/static/login_style.css">
+    <link rel="stylesheet" href="/static/fallout-theme.css">
     <style>
         /* All login styles moved to /static/login_style.css */
     </style>
+    <script>
+        // Early theme initialization to prevent flash
+        (function() {
+            if (localStorage.getItem('themeMode') === 'fallout') {
+                document.documentElement.classList.add('theme-fallout');
+            }
+        })();
+    </script>
 </head>
 <body>
     <div class="monitor-casing">
@@ -18,6 +27,9 @@
             
             <!-- INFO BUTTON -->
             <button class="info-button" id="infoBtn" title="System Information">i</button>
+
+            <!-- THEME TOGGLE BUTTON -->
+            <button class="theme-toggle-button" id="themeToggleBtn" title="Switch Interface Theme"></button>
 
             <!-- ROLES INFORMATION MODAL -->
             <div class="roles-modal-overlay" id="rolesModal">
@@ -107,6 +119,50 @@
     </div>
 
     <script>
+        // === THEME TOGGLE FUNCTIONALITY ===
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        let isFalloutThemeActive = localStorage.getItem('themeMode') === 'fallout';
+
+        function initializeTheme() {
+            if (isFalloutThemeActive) {
+                document.body.classList.add('theme-fallout');
+                document.documentElement.classList.add('theme-fallout');
+                updateThemeToggleButtonUI();
+            }
+        }
+
+        function updateThemeToggleButtonUI() {
+            if (isFalloutThemeActive) {
+                themeToggleBtn.style.opacity = '1';
+                themeToggleBtn.style.borderColor = 'var(--pipboy-primary)';
+                themeToggleBtn.style.boxShadow = '0 0 15px var(--pipboy-primary)';
+            } else {
+                themeToggleBtn.style.opacity = '0.6';
+                themeToggleBtn.style.borderColor = 'var(--phosphor-dim)';
+                themeToggleBtn.style.boxShadow = '0 0 8px var(--phosphor-dim)';
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', function() {
+            isFalloutThemeActive = !isFalloutThemeActive;
+            localStorage.setItem('themeMode', isFalloutThemeActive ? 'fallout' : 'default');
+            
+            if (isFalloutThemeActive) {
+                document.body.classList.add('theme-fallout');
+                document.documentElement.classList.add('theme-fallout');
+            } else {
+                document.body.classList.remove('theme-fallout');
+                document.documentElement.classList.remove('theme-fallout');
+            }
+            
+            updateThemeToggleButtonUI();
+        });
+
+        // Initialize theme on page load
+        window.addEventListener('load', function() {
+            initializeTheme();
+        });
+
         const infoBtn = document.getElementById('infoBtn');
         const rolesModal = document.getElementById('rolesModal');
         const rolesContainer = document.getElementById('rolesContainer');
@@ -180,7 +236,10 @@
         }
 
         // Start animation on page load
-        window.addEventListener('load', animateProtocol);
+        window.addEventListener('load', function() {
+            animateProtocol();
+            initializeTheme();
+        });
         // Restart animation every 8 seconds (cycle)
         setInterval(animateProtocol, 8000);
 
@@ -193,6 +252,18 @@
             }
         `;
         document.head.appendChild(style);
+        
+        // === HALF-LIFE AUDIO SYSTEM - Проверка ошибок аутентификации ===
+        const errorMsg = document.querySelector('.error-msg');
+        if (errorMsg) {
+            // Если есть сообщение об ошибке - воспроизводим звук доступа запрещён
+            setTimeout(() => {
+                halfLifeAudio.playAccessDenied();
+            }, 300);
+        }
     </script>
+    
+    <!-- Half-Life Audio System - Valve Audio Files Integration -->
+    <script src="/static/half-life-audio.js"></script>
 </body>
 </html>
