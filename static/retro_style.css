@@ -811,59 +811,186 @@ a {
     }
 }
 /* ============================================================================ */
-/* THEME TOGGLE BUTTON FOR TERMINAL (VISIBLE & ALWAYS ACCESSIBLE)             */
+/* THEME TOGGLE BUTTON FOR TERMINAL (IN ACTIONS PANEL)                         */
+/* ============================================================================ */
+/* Now using standard .btn styling - all rules inherited from button/input[type="submit"] */
+#themeToggleBtnTerminal {
+    min-width: 120px;
+}
+
+/* ============================================================================ */
+/* INTEGRATED SEARCH - Pip-Boy style                                           */
 /* ============================================================================ */
 
-.theme-toggle-button-terminal {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    z-index: 160;
-    width: 50px;
-    height: 50px;
-    background: #020202;
-    border: 2px solid var(--phosphor-primary);
+.search-container {
+    position: relative;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.search-toggle-btn {
+    background: rgba(20, 20, 20, 0.8);
+    border: 1px solid var(--phosphor-dim);
     color: var(--phosphor-primary);
-    font-size: 1.4rem;
-    font-family: 'VT323', monospace;
-    font-weight: bold;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 2px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 1;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    text-shadow: 0 0 5px var(--phosphor-primary);
-    pointer-events: auto;
-    clip-path: polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    position: relative;
+    font-weight: bold;
+    padding: 0;
 }
 
-.theme-toggle-button-terminal::before {
-    content: '▬';
-    font-size: 1.6rem;
+/* Pip-Boy magnifying glass icon using CSS */
+.search-toggle-btn::before {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--phosphor-primary);
+    border-radius: 50%;
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
-.theme-toggle-button-terminal:hover {
-    background: #050505;
-    border-color: var(--phosphor-warn);
-    box-shadow: 0 0 15px var(--phosphor-warn);
-    text-shadow: 0 0 12px var(--phosphor-warn);
+.search-toggle-btn::after {
+    content: '';
+    width: 2px;
+    height: 6px;
+    background: var(--phosphor-primary);
+    position: absolute;
+    right: 5px;
+    bottom: 6px;
+    transform: rotate(-45deg);
 }
 
-.theme-toggle-button-terminal:active {
+.search-toggle-btn:hover {
+    border-color: var(--phosphor-primary);
+    box-shadow: 0 0 10px rgba(51, 255, 51, 0.2);
+    background: rgba(30, 30, 30, 0.9);
+}
+
+.search-toggle-btn:active {
     transform: scale(0.95);
+}
+
+/* Search input field */
+.search-input-main {
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid var(--phosphor-primary);
+    color: var(--phosphor-primary);
+    padding: 8px 12px;
+    border-radius: 2px;
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    width: 200px;
+    outline: none;
+    box-shadow: 0 0 8px rgba(51, 255, 51, 0.15);
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.search-input-main:focus {
+    box-shadow: 0 0 15px rgba(51, 255, 51, 0.3);
+    border-color: var(--phosphor-primary);
+}
+
+.search-input-main::placeholder {
+    color: var(--phosphor-dim);
+}
+
+/* Search suggestions dropdown */
+.search-suggestions-main {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(2, 2, 2, 0.95);
+    border: 1px solid var(--phosphor-dim);
+    border-top: none;
+    border-radius: 0 0 2px 2px;
+    margin-top: -1px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1001;
+    display: none;
+    min-width: 180px;
+}
+
+.search-suggestions-main.active {
+    display: block;
+}
+
+.suggestion-item-main {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--phosphor-dim);
+    cursor: pointer;
+    color: var(--phosphor-primary);
+    font-family: 'VT323', monospace;
+    font-size: 0.95rem;
+    transition: all 0.1s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.suggestion-item-main:hover {
+    background-color: rgba(51, 255, 51, 0.1);
+    text-shadow: 0 0 5px rgba(51, 255, 51, 0.5);
+}
+
+/* Search Mode Toggle Button */
+.search-mode-btn {
+    background: #020202;
+    border: 1px solid var(--phosphor-primary);
+    color: var(--phosphor-primary);
+    font-family: 'VT323', monospace;
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: all 0.1s;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-radius: 0;
+}
+
+.search-mode-btn:hover {
+    background: var(--phosphor-primary);
+    color: #000;
     box-shadow: 0 0 10px var(--phosphor-primary);
 }
 
-/* Active state for Fallout theme */
-body.theme-fallout .theme-toggle-button-terminal {
-    border-color: var(--pipboy-primary);
-    color: var(--pipboy-primary);
-    text-shadow: 0 0 5px var(--pipboy-primary);
+.search-mode-btn:active {
+    transform: scale(0.95);
+}
+.suggestion-item-main:hover {
+    background: rgba(51, 255, 51, 0.15);
+    padding-left: 16px;
+    text-shadow: 0 0 5px rgba(51, 255, 51, 0.5);
 }
 
-body.theme-fallout .theme-toggle-button-terminal:hover {
-    border-color: var(--pipboy-accent);
-    box-shadow: 0 0 15px var(--pipboy-accent);
-    text-shadow: 0 0 12px var(--pipboy-accent);
+.suggestion-item-main:last-child {
+    border-bottom: none;
+}
+
+/* Smooth scroll for suggestions */
+.search-suggestions-main::-webkit-scrollbar {
+    width: 4px;
+}
+
+.search-suggestions-main::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.search-suggestions-main::-webkit-scrollbar-thumb {
+    background: var(--phosphor-dim);
+    border-radius: 2px;
 }

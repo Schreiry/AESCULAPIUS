@@ -159,10 +159,10 @@ INSERT INTO BioThreats (ThreatID, ThreatName, ThreatLevel, LethalityRate) VALUES
 (50, 'Void Exposure', 4, 1.0);
 
 -- 6. ТАБЛИЦА ПАЦИЕНТОВ (СУБЪЕКТОВ)
--- ПРИМЕЧАНИЕ: CodeName NVARCHAR(1000) согласно требованиям.
+-- ПРИМЕЧАНИЕ: CodeName NVARCHAR(MAX) для больших объемов данных.
 CREATE TABLE Subjects (
     SubjectID INT PRIMARY KEY IDENTITY(1,1),
-    CodeName NVARCHAR(1000), -- Увеличено до 1000
+    CodeName NVARCHAR(MAX), -- Расширено до MAX для неограниченного хранения
     
     -- Связь с таблицей угроз
     AssignedThreatID INT FOREIGN KEY REFERENCES BioThreats(ThreatID),

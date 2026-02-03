@@ -36,7 +36,8 @@ class HalfLifeAudioManager {
         if (this.isInitialized) return;
         this.isInitialized = true;
         this.createAudioElements();
-        this.startBackgroundMusic();
+        // НЕ пытаемся автозапустить музыку - браузеры блокируют
+        // Музыка только по явной команде юзера
     }
     
     createAudioElements() {
@@ -250,10 +251,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// При загрузке страницы - начинаем фоновую музыку
-window.addEventListener('load', function() {
-    halfLifeAudio.startBackgroundMusic();
-});
+// При загрузке страницы - НЕ пытаемся автозапустить фоновую музыку
+// Браузеры блокируют autoplay звука без явного user gesture
+// Музыка будет воспроизводиться только по явному действию пользователя
 
 // Экспорт для использования в других скриптах
 if (typeof module !== 'undefined' && module.exports) {

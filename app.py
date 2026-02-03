@@ -16,9 +16,8 @@ app = Flask(__name__)
 app.secret_key = SECRET_KEY 
 
 # --- КОНФИГУРАЦИЯ СЕРВЕРА ---
-# Убедись, что имя сервера верное
-YOUR_SERVER_NAME = r'DESKTOP-T9D302K\SQLEXPRESS' 
-# YOUR_SERVER_NAME = r'DGSurface\SQLEXPRESS' 
+# YOUR_SERVER_NAME = r'DESKTOP-T9D302K\SQLEXPRESS' 
+YOUR_SERVER_NAME = r'DGSurface\SQLEXPRESS' 
 
 CONN_STR = (
     r'DRIVER={ODBC Driver 17 for SQL Server};'
@@ -306,15 +305,24 @@ def get_all_data():
             'patients': [],
             'doctors': [],
             'rooms': [],
-            'threats': []
+            'threats': [],
+            'total_patients': 0
         })
 
     try:
         cursor = conn.cursor()
+        
+        # Get pagination parameters
+        offset = request.args.get('offset', 0, type=int)
+        limit = request.args.get('limit', 100, type=int)  # 100 records per page
 
-        # Fetch Subjects
+        # Fetch total count of all patients
+        cursor.execute("SELECT COUNT(*) FROM Subjects")
+        total_count = cursor.fetchone()[0]
+
+        # Fetch paginated Subjects
         query_subjects = """
-            SELECT TOP 20
+            SELECT 
                 S.SubjectID,
                 S.CodeName,
                 T.ThreatName,
@@ -331,23 +339,24 @@ def get_all_data():
             JOIN BioThreats T ON S.AssignedThreatID = T.ThreatID
             LEFT JOIN Doctors D ON S.AssignedDoctorID = D.DoctorID
             LEFT JOIN Rooms R ON S.AssignedRoomID = R.RoomID
-            ORDER BY S.ArrivalTimestamp DESC
+            ORDER BY S.SubjectID DESC
+            OFFSET ? ROWS FETCH NEXT ? ROWS ONLY
         """
-        cursor.execute(query_subjects)
+        cursor.execute(query_subjects, (offset, limit))
         rows_subjects = cursor.fetchall()
 
         patients = []
         for row in rows_subjects:
             patients.append([
                 row.SubjectID,
-                decrypt_data(row.CodeName), # Расшифровываем имя
+                decrypt_data(row.CodeName),
                 row.ThreatName,
                 row.StatusColor,
                 row.HeartRate,
                 row.SPO2,
                 row.DocName,
                 row.RoomName,
-                row.ArrivalTimestamp.isoformat(), # Use isoformat for JS compatibility
+                row.ArrivalTimestamp.isoformat(),
                 row.ThreatID,
                 row.DoctorID,
                 row.RoomID
@@ -375,7 +384,10 @@ def get_all_data():
             'patients': patients,
             'doctors': doctors,
             'rooms': rooms,
-            'threats': threats
+            'threats': threats,
+            'total_patients': total_count,
+            'offset': offset,
+            'limit': limit
         })
 
     finally:
@@ -473,6 +485,130 @@ def resolve_subject():
     except Exception:
         return jsonify({'success': False}), 500
 
+@app.route('/api/search', methods=['POST'])
+@login_required
+def search_patients():
+    """
+    Search for patients by name or code.
+    Request JSON:
+    {
+        "query": "search_string",
+        "search_type": "name" or "code"
+    }
+    """
+    data = request.get_json()
+    query = data.get('query', '').strip()
+    search_type = data.get('search_type', 'name')  # 'name' or 'code'
+    
+    if not query or len(query) < 1:
+        return jsonify([])
+    
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({"error": "Database Error"}), 500
+    
+    try:
+        cursor = conn.cursor()
+        
+        if search_type == 'code':
+            # Search by code (SubjectID) - partial match
+            # Get all patients and filter by code
+            cursor.execute("""
+                SELECT SubjectID, CodeName, AssignedDoctorID, AssignedRoomID
+                FROM Subjects
+                ORDER BY ArrivalTimestamp DESC
+            """)
+            rows = cursor.fetchall()
+            results = []
+            
+            query_lower = query.lower()
+            for row in rows:
+                subject_id = row.SubjectID
+                # Match code as string
+                if query_lower in str(subject_id).lower():
+                    encrypted_name = row.CodeName
+                    try:
+                        decrypted_name = decrypt_data(encrypted_name)
+                    except:
+                        decrypted_name = "[ERROR_DECRYPT]"
+                    
+                    results.append({
+                        'id': subject_id,
+                        'name': decrypted_name,
+                        'doctor_id': row.AssignedDoctorID,
+                        'room_id': row.AssignedRoomID,
+                        'search_type': 'code'
+                    })
+            
+            return jsonify(results)
+        
+        else:  # search_type == 'name'
+            # Search by name (CodeName) - fuzzy matching
+            cursor.execute("""
+                SELECT SubjectID, CodeName, AssignedDoctorID, AssignedRoomID
+                FROM Subjects
+                ORDER BY ArrivalTimestamp DESC
+            """)
+            rows = cursor.fetchall()
+            results = []
+            
+            for row in rows:
+                subject_id = row.SubjectID
+                encrypted_name = row.CodeName
+                try:
+                    decrypted_name = decrypt_data(encrypted_name)
+                    # Fuzzy matching on name/surname
+                    if _fuzzy_match(query, decrypted_name.lower()):
+                        results.append({
+                            'id': subject_id,
+                            'name': decrypted_name,
+                            'doctor_id': row.AssignedDoctorID,
+                            'room_id': row.AssignedRoomID,
+                            'search_type': 'name'
+                        })
+                except:
+                    continue
+            
+            return jsonify(results)  # Return all matches, not limited
+    
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        conn.close()
+
+def _fuzzy_match(query, target):
+    """Simple fuzzy matching algorithm."""
+    # Direct substring match
+    if query in target:
+        return True
+    
+    # Check if query matches start of name
+    if target.startswith(query):
+        return True
+    
+    # Check if query matches after space (surname matching)
+    parts = target.split()
+    for part in parts:
+        if part.lower().startswith(query):
+            return True
+    
+    # Levenshtein-like distance (simplified)
+    if len(query) >= 2:
+        for i in range(len(target) - len(query) + 1):
+            substring = target[i:i+len(query)]
+            if _similarity(query, substring) >= 0.75:
+                return True
+    
+    return False
+
+def _similarity(s1, s2):
+    """Calculate simple similarity score (0-1)."""
+    if len(s1) != len(s2):
+        return 0
+    
+    matches = sum(c1 == c2 for c1, c2 in zip(s1, s2))
+    return matches / len(s1)
+
 @app.route('/api/export')
 @login_required
 def export_data():
@@ -481,7 +617,7 @@ def export_data():
     try:
         cursor = conn.cursor()
         query = """
-            SELECT TOP 1000 S.SubjectID, S.CodeName, T.ThreatName, S.StatusColor, S.HeartRate, S.SPO2, D.DocName, R.RoomName, S.ArrivalTimestamp
+            SELECT S.SubjectID, S.CodeName, T.ThreatName, S.StatusColor, S.HeartRate, S.SPO2, D.DocName, R.RoomName, S.ArrivalTimestamp
             FROM Subjects S JOIN BioThreats T ON S.AssignedThreatID = T.ThreatID
             LEFT JOIN Doctors D ON S.AssignedDoctorID = D.DoctorID
             LEFT JOIN Rooms R ON S.AssignedRoomID = R.RoomID
@@ -493,9 +629,8 @@ def export_data():
         cw = csv.writer(si)
         cw.writerow(['ID', 'Patient Name', 'Diagnosis', 'Threat Level', 'HR', 'SPO2', 'Doctor', 'Location', 'Time'])
         for row in rows:
-            # Создаем изменяемую копию кортежа, расшифровываем имя и записываем
             row_list = list(row)
-            row_list[1] = decrypt_data(row_list[1]) # row_list[1] это CodeName
+            row_list[1] = decrypt_data(row_list[1])  # Decrypt CodeName
             cw.writerow(row_list)
         output = make_response(si.getvalue())
         output.headers["Content-Disposition"] = "attachment; filename=export_logs.csv"

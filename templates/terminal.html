@@ -26,18 +26,27 @@
             <div class="content-layer">
                 
                 <div class="panel control-panel" style="position: relative;">
-                    <!-- VISIBLE THEME TOGGLE BUTTON FOR TERMINAL -->
-                    <button class="theme-toggle-button-terminal" id="themeToggleBtnTerminal" title="Switch Interface Theme"></button>
                     
                     <div class="header-box">
                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                             <div style="flex-grow: 1;">
-                                <h1 style="font-size: 2.5rem;">AESCULAPIUS <span class="blink">_ V1.5.0 SECURE</span></h1>
+                                <h1 style="font-size: 2.5rem;">AESCULAPIUS <span class="blink">_ V1.5.1 SECURE</span></h1>
                                 <div class="user-badge">
                                     <div class="sub-header">USER: {{ user_name }} // ROLE: {{ user_role|upper }} // TERMINAL: 04-B</div>
                                 </div>
                                 
-                                <div class="actions" style="margin-top: 15px;">
+                                <div class="actions" style="margin-top: 15px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                                    <!-- Search container with search mode toggle -->
+                                    <div class="search-container">
+                                        <button class="search-toggle-btn" id="searchToggleBtnMain" title="Search Patients"></button>
+                                        <button class="search-mode-btn" id="searchModeBtn" title="Toggle search mode" style="display: none; margin-left: 5px;">BY NAME</button>
+                                        <input type="text" class="search-input-main" id="searchInputMain" placeholder="QUERY..." style="display: none;">
+                                        <div class="search-suggestions-main" id="searchSuggestionsMain"></div>
+                                    </div>
+                                    
+                                    <!-- Theme Toggle Button -->
+                                    <button class="btn" id="themeToggleBtnTerminal" title="Switch Interface Theme">THEME</button>
+                                    
                                     {% if user_role in ['Manager'] %}
                                     <button id="toggleChaosEngineBtn" onclick="toggleSim()" class="btn danger-btn">TOGGLE CHAOS ENGINE</button>
                                     {% endif %}
@@ -154,13 +163,9 @@
 
         function updateThemeToggleButtonTerminalUI() {
             if (isFalloutThemeActive) {
-                themeToggleBtnTerminal.style.opacity = '1';
-                themeToggleBtnTerminal.style.borderColor = 'var(--pipboy-primary)';
-                themeToggleBtnTerminal.style.boxShadow = '0 0 15px var(--pipboy-primary)';
+                themeToggleBtnTerminal.textContent = 'FALEWGASEM';
             } else {
-                themeToggleBtnTerminal.style.opacity = '0.6';
-                themeToggleBtnTerminal.style.borderColor = 'var(--phosphor-dim)';
-                themeToggleBtnTerminal.style.boxShadow = '0 0 8px var(--phosphor-dim)';
+                themeToggleBtnTerminal.textContent = 'THEME: DEFAULT';
             }
         }
 
@@ -189,11 +194,16 @@
         let allDoctors = [];
         let allRooms = [];
         let allThreats = [];
+        let currentOffset = 0;
+        const loadLimit = 100;
+        let allLoadedPatients = [];
+        let totalPatientCount = 0;
+        let fetchIntervalId = null;
 
-        // --- FETCH CYCLE ---
+        // --- FETCH CYCLE WITH PAGINATION ---
         async function fetchUpdates() {
             try {
-                const response = await fetch('/api/data');
+                const response = await fetch(`/api/data?offset=${currentOffset}&limit=${loadLimit}`);
                 if(response.status === 403) { window.location.href = '/login'; return; }
                 
                 const data = await response.json();
@@ -204,18 +214,78 @@
                 }
                 allDoctors = data.doctors;
                 allRooms = data.rooms;
+                totalPatientCount = data.total_patients;
                 
-                renderTable(data.patients);
+                // ONLY on initial load or when offset resets - don't concat infinitely
+                if (currentOffset === 0) {
+                    allLoadedPatients = data.patients;
+                } else {
+                    // When loading more, carefully append only new patients
+                    allLoadedPatients = allLoadedPatients.concat(data.patients);
+                }
+                
+                renderTable(allLoadedPatients);
+                renderLoadMoreButton();
             } catch (e) {
                 console.error("Connection lost", e);
             }
         }
-        setInterval(fetchUpdates, 3000);
+        
+        // Start interval and store ID for cleanup
+        fetchIntervalId = setInterval(fetchUpdates, 3000);
         fetchUpdates();
+        
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (fetchIntervalId) {
+                clearInterval(fetchIntervalId);
+            }
+        });
 
-        // --- RENDER TABLE ---
+        // --- LOAD MORE FUNCTIONALITY ---
+        function renderLoadMoreButton() {
+            const tbody = document.getElementById('patientTableBody');
+            let loadMoreRow = document.getElementById('loadMoreRow');
+            
+            // Check if we have more data to load
+            const hasMore = (currentOffset + loadLimit) < totalPatientCount;
+            
+            if (hasMore) {
+                if (!loadMoreRow) {
+                    loadMoreRow = document.createElement('tr');
+                    loadMoreRow.id = 'loadMoreRow';
+                    loadMoreRow.style.backgroundColor = 'rgba(51, 255, 51, 0.05)';
+                    loadMoreRow.innerHTML = `
+                        <td colspan="8" style="text-align: center; padding: 20px;">
+                            <button class="btn" onclick="loadMorePatients()" style="padding: 10px 30px;">LOAD MORE RECORDS</button>
+                        </td>
+                    `;
+                    tbody.appendChild(loadMoreRow);
+                }
+            } else {
+                if (loadMoreRow) {
+                    loadMoreRow.remove();
+                }
+            }
+        }
+        
+        function loadMorePatients() {
+            currentOffset += loadLimit;
+            // IMPORTANT: Reset allLoadedPatients on load-more to prevent infinite memory growth
+            // We'll fetch fresh data instead of appending infinitely
+            allLoadedPatients = [];
+            fetchUpdates();
+        }
+
+        // --- RENDER TABLE WITH MEMORY OPTIMIZATION ---
         function renderTable(patients) {
             const tbody = document.getElementById('patientTableBody');
+            
+            // Clear old rows (except load-more button)
+            const loadMoreRow = document.getElementById('loadMoreRow');
+            if (loadMoreRow) {
+                loadMoreRow.remove();
+            }
             tbody.innerHTML = '';
             
             if(patients.length === 0) {
@@ -223,10 +293,13 @@
                 return;
             }
 
-            patients.forEach(p => {
-                // p indexes: 0:ID, 1:Name, 2:ThreatName, 3:Color, 4:HR, 5:SPO2, 6:DocName, 7:RoomName, 8:Timestamp, 9: ThreatID, 10: DocID, 11: RoomID
+            // Render max 100 rows at a time to prevent DOM bloat
+            const maxRenderCount = 100;
+            const renderPatients = patients.slice(0, maxRenderCount);
+
+            renderPatients.forEach(p => {
                 const row = document.createElement('tr');
-                const safeData = encodeURIComponent(JSON.stringify(p)); // Define safeData here
+                const safeData = encodeURIComponent(JSON.stringify(p));
                 
                 const color = p[3] || 'Green';
                 row.className = 'row-' + color.toLowerCase();
@@ -238,12 +311,12 @@
                             <button class="mini-btn delete-btn" onclick="deletePatient(${p[0]}, event)">X</button>
                         </td>
                     `;
-                    row.setAttribute('onclick', `openModal('edit', '${safeData}')`); // Make row clickable for edit
+                    row.setAttribute('onclick', `openModal('edit', '${safeData}')`);
                 }
 
                 row.innerHTML = `
                     <td>${p[0]}</td>
-                    <td><span class="status-dot ${p[3].toLowerCase()}"></span></td>
+                    <td><span class="status-dot ${p[3].toLowerCase()}"></span> ${p[3]}</td>
                     <td style="text-align:left; padding-left:20px;">${p[1]}</td>
                     <td>${p[2]}</td>
                     <td>${p[4]} BPM / ${p[5]}%</td>
@@ -253,6 +326,15 @@
                 `;
                 tbody.appendChild(row);
             });
+            
+            // Warn if table is larger than optimal
+            if (patients.length > maxRenderCount) {
+                const warningRow = document.createElement('tr');
+                warningRow.innerHTML = `<td colspan="8" style="text-align:center; color: #ffff33; padding: 10px;">
+                    Showing ${maxRenderCount} of ${patients.length} records. Use LOAD MORE or filters to manage data.
+                </td>`;
+                tbody.appendChild(warningRow);
+            }
         }
 
         // --- MODAL MANAGEMENT ---
@@ -305,6 +387,17 @@
         function closeModal() {
             document.getElementById('patientModalOverlay').style.display = 'none';
         }
+        
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('patientModalOverlay');
+                // Only close if modal is visible
+                if (modal && modal.style.display === 'flex') {
+                    closeModal();
+                }
+            }
+        });
 
         async function submitAdd() {
             const body = {
@@ -548,6 +641,292 @@
                 div.appendChild(upBtn);
                 div.appendChild(downBtn);
             });
+        });
+
+        // === DRAG AND DROP FOR ACTION BUTTONS ===
+        const actionButtonsContainer = document.querySelector('.actions');
+        let draggedButton = null;
+        let dragOffsetX = 0;
+        let initialPosition = 0;
+        
+        function initButtonDragDrop() {
+            const buttons = actionButtonsContainer.querySelectorAll('a, button:not(.search-toggle-btn):not(.search-mode-btn), input[type="text"]:not(.search-input-main)');
+            
+            buttons.forEach(btn => {
+                btn.draggable = false;
+                btn.style.cursor = 'grab';
+                btn.addEventListener('mousedown', startButtonDrag);
+            });
+        }
+        
+        function startButtonDrag(e) {
+            // Only drag with left mouse button
+            if (e.button !== 0) return;
+            
+            draggedButton = this;
+            dragOffsetX = e.clientX - draggedButton.getBoundingClientRect().left;
+            initialPosition = Array.from(actionButtonsContainer.children).indexOf(draggedButton);
+            
+            draggedButton.style.cursor = 'grabbing';
+            draggedButton.style.opacity = '0.6';
+            draggedButton.style.transform = 'scale(1.05)';
+            
+            document.addEventListener('mousemove', moveButton);
+            document.addEventListener('mouseup', endButtonDrag);
+            e.preventDefault();
+        }
+        
+        function moveButton(e) {
+            if (!draggedButton) return;
+            
+            const container = actionButtonsContainer;
+            const dragX = e.clientX - container.getBoundingClientRect().left;
+            const buttons = Array.from(container.children).filter(child => 
+                child === draggedButton || 
+                child.tagName === 'A' || 
+                (child.tagName === 'BUTTON' && !child.classList.contains('search-toggle-btn')) ||
+                child.classList.contains('search-container')
+            );
+            
+            // Find which button to swap with
+            buttons.forEach((btn, index) => {
+                const rect = btn.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                const btnCenter = rect.left - containerRect.left + rect.width / 2;
+                
+                if (dragX < btnCenter && draggedButton !== btn) {
+                    if (Array.from(container.children).indexOf(draggedButton) > Array.from(container.children).indexOf(btn)) {
+                        btn.parentNode.insertBefore(draggedButton, btn);
+                    }
+                } else if (dragX > btnCenter && draggedButton !== btn) {
+                    if (Array.from(container.children).indexOf(draggedButton) < Array.from(container.children).indexOf(btn)) {
+                        btn.parentNode.insertBefore(draggedButton, btn.nextSibling);
+                    }
+                }
+            });
+        }
+        
+        function endButtonDrag() {
+            if (!draggedButton) return;
+            
+            draggedButton.style.cursor = 'grab';
+            draggedButton.style.opacity = '1';
+            draggedButton.style.transform = 'scale(1)';
+            
+            // Save button order to session storage
+            const order = Array.from(actionButtonsContainer.children)
+                .filter(child => child.id || child.classList.length > 0)
+                .map((child, idx) => ({
+                    id: child.id || `btn-${idx}`,
+                    html: child.outerHTML
+                }));
+            
+            sessionStorage.setItem('actionButtonOrder', JSON.stringify(order));
+            
+            document.removeEventListener('mousemove', moveButton);
+            document.removeEventListener('mouseup', endButtonDrag);
+            draggedButton = null;
+        }
+        
+        // Initialize drag-drop on page load
+        window.addEventListener('load', function() {
+            setTimeout(initButtonDragDrop, 200);
+        });
+
+        // === INTEGRATED SEARCH FUNCTIONALITY WITH DUAL MODE ===
+        const searchToggleBtnMain = document.getElementById('searchToggleBtnMain');
+        const searchModeBtn = document.getElementById('searchModeBtn');
+        const searchInputMain = document.getElementById('searchInputMain');
+        const searchSuggestionsMain = document.getElementById('searchSuggestionsMain');
+        
+        let searchActiveMain = false;
+        let currentSearchMode = 'name';  // 'name' or 'code'
+        let isFilterActive = false;  // Track if filter is applied
+        let filteredResults = [];  // Store current search results
+        
+        // Toggle search input
+        searchToggleBtnMain.addEventListener('click', function(e) {
+            e.stopPropagation();
+            searchActiveMain = !searchActiveMain;
+            
+            if (searchActiveMain) {
+                searchInputMain.style.display = 'inline-block';
+                searchModeBtn.style.display = 'inline-block';
+                searchInputMain.focus();
+            } else {
+                searchInputMain.style.display = 'none';
+                searchModeBtn.style.display = 'none';
+                searchInputMain.value = '';
+                searchSuggestionsMain.classList.remove('active');
+                // Clear filter if active
+                if (isFilterActive) {
+                    isFilterActive = false;
+                    renderTable(allLoadedPatients);
+                }
+                searchInputMain.blur();
+            }
+        });
+        
+        // Toggle search mode (name vs code)
+        searchModeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (currentSearchMode === 'name') {
+                currentSearchMode = 'code';
+                searchModeBtn.textContent = 'BY CODE';
+                searchInputMain.placeholder = 'ENTER CODE ID...';
+            } else {
+                currentSearchMode = 'name';
+                searchModeBtn.textContent = 'BY NAME';
+                searchInputMain.placeholder = 'QUERY...';
+            }
+            // Clear suggestions and filter
+            searchSuggestionsMain.classList.remove('active');
+            if (isFilterActive) {
+                isFilterActive = false;
+                renderTable(allLoadedPatients);
+            }
+            searchInputMain.value = '';
+            searchInputMain.focus();
+        });
+        
+        // Search input handler - show suggestions on input
+        searchInputMain.addEventListener('input', async function() {
+            const query = this.value.trim();
+            
+            if (query.length < 1) {
+                searchSuggestionsMain.classList.remove('active');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query: query,
+                        search_type: currentSearchMode
+                    })
+                });
+                
+                if (response.ok) {
+                    const results = await response.json();
+                    displaySearchSuggestionsMain(results);
+                } else {
+                    searchSuggestionsMain.classList.remove('active');
+                }
+            } catch (e) {
+                console.error('Search error:', e);
+                searchSuggestionsMain.classList.remove('active');
+            }
+        });
+        
+        // Handle Enter key - apply filter
+        searchInputMain.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applySearchFilter();
+            }
+        });
+        
+        // Apply search filter to table
+        async function applySearchFilter() {
+            const query = searchInputMain.value.trim();
+            
+            if (query.length < 1) {
+                renderTable(allLoadedPatients);
+                isFilterActive = false;
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        query: query,
+                        search_type: currentSearchMode
+                    })
+                });
+                
+                if (response.ok) {
+                    const results = await response.json();
+                    // Convert results to table format for display
+                    // We need to fetch full patient data for these results
+                    if (results.length > 0) {
+                        // Get full data from loaded patients
+                        filteredResults = [];
+                        results.forEach(searchResult => {
+                            const fullPatient = allLoadedPatients.find(p => p[0] === searchResult.id);
+                            if (fullPatient) {
+                                filteredResults.push(fullPatient);
+                            }
+                        });
+                        
+                        // If we found matches in loaded data, show them
+                        if (filteredResults.length > 0) {
+                            isFilterActive = true;
+                            renderTable(filteredResults);
+                            searchSuggestionsMain.classList.remove('active');
+                        } else {
+                            // No matches in currently loaded data
+                            alert(`No results found in currently loaded records.\n\nMatches found in database but not loaded yet.\nUse "LOAD MORE RECORDS" to fetch older entries.`);
+                            isFilterActive = false;
+                        }
+                    } else {
+                        alert('NO RESULTS FOUND');
+                        isFilterActive = false;
+                    }
+                }
+            } catch (e) {
+                console.error('Filter error:', e);
+            }
+        }
+        
+        // Display search suggestions - show autocomplete suggestions
+        function displaySearchSuggestionsMain(results) {
+            searchSuggestionsMain.innerHTML = '';
+            
+            if (results.length === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'suggestion-item-main';
+                noResults.innerHTML = 'NO RESULTS FOUND';
+                noResults.style.opacity = '0.6';
+                searchSuggestionsMain.appendChild(noResults);
+                searchSuggestionsMain.classList.add('active');
+                return;
+            }
+            
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item-main';
+                item.innerHTML = `[${result.id}] ${result.name}`;
+                item.addEventListener('click', function() {
+                    // Apply filter when clicking suggestion
+                    searchInputMain.value = currentSearchMode === 'code' ? result.id : result.name;
+                    applySearchFilter();
+                });
+                
+                searchSuggestionsMain.appendChild(item);
+            });
+            
+            searchSuggestionsMain.classList.add('active');
+        }
+        
+        // Clear filter on Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                // Clear search filter
+                if (isFilterActive) {
+                    isFilterActive = false;
+                    renderTable(allLoadedPatients);
+                    searchInputMain.value = '';
+                    searchSuggestionsMain.classList.remove('active');
+                }
+                // Close search panel
+                else if (searchActiveMain) {
+                    searchToggleBtnMain.click();
+                }
+            }
         });
     </script>
     
